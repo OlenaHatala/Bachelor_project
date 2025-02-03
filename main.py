@@ -3,42 +3,33 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 
-def create_graph(num_nodes):
-    G = nx.erdos_renyi_graph(num_nodes, 0.1) 
-    return G
+st.title("Simulation of desinformation spreading")
 
-def simulate_spread(G, start_node, steps=5):
-    infected = [start_node]
-    for _ in range(steps):
-        new_infected = []
-        for node in infected:
-            neighbors = list(G.neighbors(node))
-            for neighbor in neighbors:
-                if neighbor not in infected and random.random() < 0.2:  # 20% шанс поширення
-                    new_infected.append(neighbor)
-        infected.extend(new_infected)
-        infected = list(set(infected))
-    return infected
 
-st.title("Симуляція поширення дезінформації у соціальних мережах")
+num_nodes = st.slider("Number of users", 2, 30, 10)
+prob_of_connection = st.slider("Probability of connection", min_value=0.0, max_value=1.0, value=0.2)
 
-num_nodes = st.slider("Кількість користувачів (вузлів)", 10, 100, 50)
-steps = st.slider("Кількість кроків поширення", 1, 10, 5)
-start_node = st.slider("Стартовий користувач", 0, num_nodes-1, 0)
 
-G = create_graph(num_nodes)
-st.write(f"Граф з {num_nodes} користувачами та зв'язками між ними.")
+graph_type = st.radio(label="Choose graph type", 
+                      options=["fast_gnp_random_graph", "scale_free_graph", "gnp_random_graph", "dense_gnm_random_graph", "barabasi_albert_graph"],
+                      index=1,
+                      horizontal=True
+                      )
 
-infected_nodes = simulate_spread(G, start_node, steps)
+set_steps_num = st.checkbox("Do you want to set number of simulation steps?")
+step_num = None
 
-plt.figure(figsize=(8, 6))
-pos = nx.spring_layout(G)  # Розташування вузлів
-nx.draw_networkx_nodes(G, pos, node_size=300, node_color='lightblue')
-nx.draw_networkx_edges(G, pos, alpha=0.5)
-nx.draw_networkx_labels(G, pos, font_size=10)
+if set_steps_num:
+    step_num = st.number_input("Enter number of steps", value=None, placeholder="Type a number...", min_value=1, step=1)
 
-nx.draw_networkx_nodes(G, pos, nodelist=infected_nodes, node_size=300, node_color='red')
 
-plt.title("Граф поширення дезінформації")
-st.pyplot(plt)
+if st.button("Generate graph", type='secondary'):
+    fig, ax = plt.subplots()
+    graph = nx.fast_gnp_random_graph(n=num_nodes, p=prob_of_connection, seed=1, directed=True)
+    position = nx.spring_layout(graph,seed=5)
 
+    nx.draw_networkx_nodes(graph, position, ax=ax)
+    nx.draw_networkx_labels(graph, position, ax=ax, font_weight='bold', font_size=10)
+    nx.draw_networkx_edges(graph, position, ax=ax, edgelist= graph.edges())
+
+    st.pyplot(fig)
