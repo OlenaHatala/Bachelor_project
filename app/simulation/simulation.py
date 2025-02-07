@@ -1,5 +1,5 @@
 import numpy as np
-from Bachelor_project.app.utils.constants import State
+from utils.constants import State
 
 def change_states(graph, graph_copy, node):
     node_state = graph.nodes[node]["state"]
