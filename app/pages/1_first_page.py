@@ -1,9 +1,9 @@
 import streamlit as st
 import networkx as nx
 import time
-from graph_utils import create_graph, visualize_graph, plot_state_changes
-from simulation import change_states
-from constants import State
+from app.utils.constants import State
+from app.utils.graph_utils import create_graph, plot_state_changes, visualize_graph
+from simulation.simulation import change_states
 
 st.title("Simulation of Desinformation Spreading")
 

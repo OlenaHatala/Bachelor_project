@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
-from constants import State, STATE2COLOR
+from Bachelor_project.app.utils.constants import State, STATE2COLOR
 
 def create_graph(num_nodes, prob_of_connection):
     plt.close()
