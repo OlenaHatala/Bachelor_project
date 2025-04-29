@@ -34,8 +34,8 @@ if submitted:
     G = generator_func(*params)
 
     pos = nx.spring_layout(G, seed=42)
-    node_colors = ["gray"] * len(G.nodes)
-    nx.draw(G, pos, with_labels=True, node_color=node_colors, node_size=500)
+    node_colors = ["lightsteelblue"] * len(G.nodes)
+    nx.draw(G, pos, with_labels=True, node_color=node_colors, edgecolors="black", node_size=500)
     st.pyplot(plt.gcf())
     plt.clf()
 
