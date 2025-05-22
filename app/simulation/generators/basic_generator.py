@@ -1,26 +1,32 @@
 import networkx as nx
 
-def generate_fast_gnp_random_graph(n, p):
-    return nx.fast_gnp_random_graph(n, p)
+class GraphGeneratorRegistry:
+    def __init__(self):
+        self.generators = {
+            "Fast GNP Random Graph": self.generate_fast_gnp_random_graph,
+            "Scale-Free Graph": self.generate_scale_free_graph,
+            "GNP Random Graph": self.generate_gnp_random_graph,
+            "Dense GNM Random Graph": self.generate_dense_gnm_random_graph,
+            "Barabasi-Albert Graph": self.generate_barabasi_albert_graph,
+        }
 
-def generate_scale_free_graph(n):
-    return nx.scale_free_graph(n)
+    def list_generators(self):
+        return list(self.generators.keys())
 
-def generate_gnp_random_graph(n, p):
-    return nx.gnp_random_graph(n, p)
+    def get_generator(self, name):
+        return self.generators.get(name, None)
 
-def generate_dense_gnm_random_graph(n, m):
-    return nx.dense_gnm_random_graph(n, m)
+    def generate_fast_gnp_random_graph(self, n, p):
+        return nx.fast_gnp_random_graph(n, p)
 
-def generate_barabasi_albert_graph(n, m):
-    return nx.barabasi_albert_graph(n, m)
+    def generate_scale_free_graph(self, n):
+        return nx.scale_free_graph(n)
 
+    def generate_gnp_random_graph(self, n, p):
+        return nx.gnp_random_graph(n, p)
 
-def get_available_generators():
-    return {
-        "Fast GNP Random Graph": generate_fast_gnp_random_graph,
-        "Scale-Free Graph": generate_scale_free_graph,
-        "GNP Random Graph": generate_gnp_random_graph,
-        "Dense GNM Random Graph": generate_dense_gnm_random_graph,
-        "Barabasi-Albert Graph": generate_barabasi_albert_graph,
-    }
+    def generate_dense_gnm_random_graph(self, n, m):
+        return nx.dense_gnm_random_graph(n, m)
+
+    def generate_barabasi_albert_graph(self, n, m):
+        return nx.barabasi_albert_graph(n, m)
