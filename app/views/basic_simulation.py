@@ -23,6 +23,7 @@ if "simulation_configured" not in st.session_state:
     st.session_state.simulation_configured = False
 if "simulation_parameters" not in st.session_state:
     st.session_state.simulation_parameters = None
+    
 
 registry = GraphGeneratorRegistry()
 graph_type = st.selectbox("Оберіть тип графу", registry.list_generators())
