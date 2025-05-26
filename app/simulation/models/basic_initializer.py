@@ -153,20 +153,30 @@ def plot_state_dynamics(state_counts, container, total_steps):
     plt.close(fig)  
 
 
-def plot_pie_chart(state_counts_dict, container):
-    labels = []
-    sizes = []
-    colors = []
+import matplotlib.pyplot as plt
 
-    for state, count in state_counts_dict.items():
-        if count > 0:
-            labels.append(state.name)
-            sizes.append(count)
-            colors.append(STATE2COLOR[state])
+def autopct_hide_zero(pct):
+    return f'{pct:.0f}%' if pct > 0 else ''
 
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')
+def plot_pie_chart(state_count, container):
+    sizes = list(state_count.values())
+    colors = [STATE2COLOR[state] for state in state_count.keys()]
+
+    fig, ax = plt.subplots(figsize=(2.5, 2.5))  # 🔧 Компактно
+
+    wedges, texts, autotexts = ax.pie(
+        sizes,
+        labels=None,                       # ❌ Без назв
+        autopct=autopct_hide_zero,         # ✅ Свої правила показу
+        startangle=90,
+        colors=colors,
+        textprops=dict(color="black", fontsize=9, weight='bold'),
+        wedgeprops=dict(width=0.5)         # 🔘 Бублик
+    )
+
+    ax.axis('equal')  # 🔵 Коло
+    fig.subplots_adjust(left=0, right=1, top=1, bottom=0)  # 🔧 Без полів
+
     container.pyplot(fig)
     plt.close(fig)
 

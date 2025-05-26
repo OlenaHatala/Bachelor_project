@@ -11,6 +11,9 @@ import copy
 from simulation.generators.basic_generator import GraphGeneratorRegistry
 from simulation.models.basic_initializer import BasicSimulationModel, State, STATE2COLOR, plot_state_dynamics, plot_pie_chart, visualize_graph, update_state
 
+# st.set_page_config(page_title="Симуляція поширення у графі", layout="wide")
+st.set_page_config(page_title="Симуляція поширення у графі", layout="centered")
+
 st.title("Симуляція поширення у графі")
 
 
@@ -26,10 +29,10 @@ graph_type = st.selectbox("Оберіть тип графу", registry.list_gene
 
 
 with st.form("graph_parameters"):
-    n = st.number_input("Кількість вузлів", min_value=1, value=20)
+    n = st.number_input("Кількість вузлів", min_value=1, value=10)
 
     if graph_type in ["Fast GNP Random Graph", "GNP Random Graph"]:
-        p = st.slider("Ймовірність з'єднання", min_value=0.0, max_value=1.0, value=0.2)
+        p = st.slider("Ймовірність з'єднання", min_value=0.0, max_value=1.0, value=0.1)
         params = (n, p)
     # elif graph_type == "Dense GNM Random Graph":
     #     m = st.slider("Кількість ребер", min_value=0, max_value=n*(n-1)//2, value=0)
@@ -57,7 +60,7 @@ if submitted:
 
 graph_container = st.empty()
 plot_container = st.empty()
-col1, col2 = st.columns([3, 1])  
+col1, col2 = st.columns([7, 3])  
 
 with col1:
     plot_container = st.empty()
@@ -151,11 +154,11 @@ if st.session_state.get("simulation_configured"):
                 visualize_graph(simulator.graph, st)
 
             with plot_container:
-                st.markdown("#### 📈 Графік динаміки")
+                # st.markdown("#### 📈 Графік динаміки")
                 plot_state_dynamics(state_counts, st, steps)
 
             with pie_chart_container:
-                st.markdown("#### 🥧 Pie Chart")
+                # st.markdown("#### 🥧 Pie Chart")
                 plot_pie_chart(state_count_current, st)
 
             time.sleep(2)
