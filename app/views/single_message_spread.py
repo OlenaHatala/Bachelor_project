@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
 
 st.set_page_config(layout="centered")
 st.title("Модель поширення інформації від однорідних джерел")
@@ -30,7 +31,6 @@ with tab1:
         external_prob = 0.0
         remaining = 0
         add_remaining = "немає залишкових вузлів"
-        disable_submit = False
 
         if use_clusters == "Так":
             num_clusters = st.number_input("Кількість кластерів", min_value=1, max_value=total_nodes, value=2, step=1)
@@ -75,7 +75,6 @@ with tab1:
 
                 if total_assigned > total_nodes:
                     st.toast(f"Загальна кількість вузлів у кластерах ({total_assigned}) перевищує допустиму ({total_nodes})", icon="⚠️")
-                    disable_submit = True
 
             remaining = total_nodes - sum(cluster_sizes)
 
@@ -105,8 +104,8 @@ with tab1:
 
         submit_custom = st.form_submit_button("Згенерувати мережу")
 
-        if submit_custom and disable_submit:
-            st.warning("Неможливо згенерувати мережу: перевищено кількість вузлів у кластерах.")
+        if submit_custom:
+            pass
 
 
 
