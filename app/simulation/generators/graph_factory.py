@@ -1,6 +1,6 @@
 import networkx as nx
 
-class GraphGeneratorRegistry:
+class GraphGeneratorFactory:
     def __init__(self):
         self.generators = {
             "Fast GNP Random Graph": self.generate_fast_gnp_random_graph,

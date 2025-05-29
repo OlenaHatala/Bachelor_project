@@ -5,21 +5,9 @@ import networkx as nx
 import streamlit as st
 import matplotlib.pyplot as plt
 
+from simulation.models.state_enums import State, STATE2COLOR
 
-class State(Enum):
-    SOURCE = 0
-    SUSCEPTIBLE = 1
-    INFECTED = 2
-    RECOVERED = 3
-
-STATE2COLOR = {
-    State.SOURCE: "red",
-    State.SUSCEPTIBLE: "lightsteelblue",
-    State.INFECTED: "darkorange",
-    State.RECOVERED: "green"
-}
-
-class BasicSimulationModel:
+class SingleMessageSpreadModel:
     def __init__(self, graph, source_nodes):
         self.graph = graph
         if isinstance(source_nodes, int):

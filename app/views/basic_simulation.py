@@ -8,8 +8,8 @@ import random
 import copy
 
 
-from simulation.generators.basic_generator import GraphGeneratorRegistry
-from simulation.models.basic_initializer import BasicSimulationModel, State, STATE2COLOR, plot_state_dynamics, plot_pie_chart, visualize_graph, update_state
+from simulation.generators.graph_factory import GraphGeneratorFactory
+from simulation.models.single_message_model import SingleMessageSpreadModel, State, STATE2COLOR, plot_state_dynamics, plot_pie_chart, visualize_graph, update_state
 
 # st.set_page_config(page_title="Симуляція поширення у графі", layout="wide")
 st.set_page_config(page_title="Симуляція поширення у графі", layout="centered")
@@ -25,7 +25,7 @@ if "simulation_parameters" not in st.session_state:
     st.session_state.simulation_parameters = None
     
 
-registry = GraphGeneratorRegistry()
+registry = GraphGeneratorFactory()
 graph_type = st.selectbox("Оберіть тип графу", registry.list_generators())
 
 
@@ -71,7 +71,7 @@ with col2:
 
 
 if st.session_state.graph is not None:
-    simulator = BasicSimulationModel(st.session_state.graph, source_nodes=[])
+    simulator = SingleMessageSpreadModel(st.session_state.graph, source_nodes=[])
     visualize_graph(simulator.graph, graph_container)
 
     with st.popover("Налаштування симуляції"):
@@ -103,7 +103,7 @@ if st.session_state.graph is not None:
             all_nodes = list(G.nodes)
             selected_sources = random.sample(all_nodes, num_sources)
 
-            simulator = BasicSimulationModel(G, selected_sources)
+            simulator = SingleMessageSpreadModel(G, selected_sources)
             G = simulator.initialize()
             visualize_graph(G, graph_container)  
 
