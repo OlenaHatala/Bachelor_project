@@ -5,9 +5,17 @@ import numpy as np
 import random
 
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
+from simulation.models.single_message_model import SingleMessageSpreadModel
+from utils.graph_visualization import visualize_graph
 
 st.set_page_config(layout="centered")
 st.title("Модель поширення інформації від однорідних джерел")
+
+if "graph_generation_method" not in st.session_state:
+    st.session_state["graph_generation_method"] = None
+if "graph" not in st.session_state:
+    st.session_state["graph"] = None
+
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
@@ -105,8 +113,35 @@ with tab1:
         submit_custom = st.form_submit_button("Згенерувати мережу")
 
         if submit_custom:
-            pass
+            builder = FlexibleGraphBuilder(total_nodes)
 
+            if use_clusters == "Так":
+                strategy = (
+                    RemainingNodeStrategy.RANDOM
+                    if add_remaining == "Додати до кластерів випадково"
+                    else RemainingNodeStrategy.SEPARATE
+                )
+
+                G = builder.build_clustered_graph(
+                    cluster_sizes=cluster_sizes,
+                    cluster_probs=cluster_probs,
+                    intercluster_prob=intercluster_prob,
+                    remaining_strategy=strategy,
+                    external_prob=external_prob
+                )
+            else:
+                G = builder.build_flat_graph(general_prob)
+
+            st.session_state["graph"] = G
+
+            # st.success(f"Граф успішно згенеровано: {G.number_of_nodes()} вузлів, {G.number_of_edges()} ребер")
+            st.success("Натиснули кнопку для створення налаштованого графа")
+            st.session_state["graph_generation_method"] = "custom"
+
+            # pos = nx.spring_layout(G, seed=42)
+            # fig, ax = plt.subplots()
+            # nx.draw(G, pos, node_color='lightblue', edge_color='gray', node_size=500)
+            # st.pyplot(fig)
 
 
 with tab2:
@@ -144,8 +179,32 @@ with tab2:
             else:
                 G = nx.empty_graph(n)
 
-            st.success(f"Граф згенеровано: {G.number_of_nodes()} вузлів, {G.number_of_edges()} ребер")
-            pos = nx.spring_layout(G, seed=42)
-            fig, ax = plt.subplots()
-            nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=500)
-            st.pyplot(fig)
+
+            st.session_state["graph"] = G
+
+            # st.success(f"Граф згенеровано: {G.number_of_nodes()} вузлів, {G.number_of_edges()} ребер")
+            st.success("Натиснули кнопку для створення автоматичного графа")
+            # pos = nx.spring_layout(G, seed=42)
+            # fig, ax = plt.subplots()
+            # nx.draw(G, pos, node_color='lightblue', edge_color='gray', node_size=500)
+            # st.pyplot(fig)
+            st.session_state["graph_generation_method"] = "auto"
+
+
+if st.session_state.graph_generation_method is not None:
+    G = st.session_state.get("graph", None)
+    # st.session_state["simulator"] = SingleMessageSpreadModel(G, [])
+    simulation = SingleMessageSpreadModel(G, [])
+
+    if G is not None:
+        st.subheader("Візуалізація збереженого графа")
+        visualize_graph(simulation.graph, st)
+
+
+
+    # if st.session_state.graph_generation_method == "custom":
+    #     pass
+
+    # if st.session_state.graph_generation_method == "auto":
+    #     pass
+    
