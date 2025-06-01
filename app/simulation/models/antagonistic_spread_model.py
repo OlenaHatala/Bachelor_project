@@ -46,32 +46,25 @@ class AntagonisticSpreadModel:
         self.update_state_tracking()
         return self.graph
 
-
     def get_num_nodes(self):
         return self.graph.number_of_nodes()
 
-
     def update_state_tracking(self):
-        """Оновлює історію та поточні підрахунки станів"""
         count = Counter([self.graph.nodes[n]["state"] for n in self.graph.nodes])
         self.state_count = dict(count)
 
         for state in AntagonisticState:
             self.state_counts[state].append(count.get(state, 0))
 
-
-
     def step(self):
         graph_copy = self.graph.copy()
         for node in self.graph.nodes:
             self.update_node_state(graph_copy, node)
 
-        # Застосовуємо нові стани
         for node in self.graph.nodes:
             self.graph.nodes[node]["state"] = graph_copy.nodes[node]["state"]
 
         self.update_state_tracking()
-
 
     def update_node_state(self, graph_copy, node):
         sg = self.graph
@@ -99,7 +92,6 @@ class AntagonisticSpreadModel:
                     graph_copy.nodes[node]["state"] = AntagonisticState.INFECTED_B
 
             elif inf_A and inf_B:
-                # обираємо сторону залежно від довіри
                 if trust_a > trust_b and trust_a > np.random.random():
                     graph_copy.nodes[node]["state"] = AntagonisticState.INFECTED_A
                 elif trust_b >= trust_a and trust_b > np.random.random():
@@ -124,9 +116,7 @@ class AntagonisticSpreadModel:
             else:
                 graph_copy.nodes[node]["state"] = AntagonisticState.SUSCEPTIBLE
 
-
     def visualize(self, container, step=None):
-        """Візуалізація поточного стану графа (антагоністична модель)"""
         fig, ax = plt.subplots()
         pos = nx.spring_layout(self.graph, seed=42)
 
@@ -145,9 +135,6 @@ class AntagonisticSpreadModel:
             edgecolors="black",
             node_size=500
         )
-
-        # За бажанням можна ввімкнути підписи вузлів:
-        # nx.draw_networkx_labels(self.graph, pos, font_color="black", font_size=10)
 
         if step is not None:
             plt.title(f"Крок {step}")

@@ -4,6 +4,7 @@ import random
 import time
 
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
+from simulation.generators.graph_factory import GraphGeneratorFactory
 from simulation.models.antagonistic_spread_model import AntagonisticSpreadModel
 from utils.graph_utils import assign_sources_dual
 from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR
@@ -157,45 +158,33 @@ with tab1:
 
 
 with tab2:
+    generator_factory = GraphGeneratorFactory()
+
+    graph_type = st.selectbox("Оберіть тип графа", generator_factory.list_generators())
+
     with st.form("auto_graph_form"):
-        graph_type = st.selectbox("Оберіть тип графа", [
-            "Fast GNP Random Graph",
-            "GNP Random Graph",
-            "Barabasi-Albert Graph",
-            "Scale-Free Graph"
-        ])
-        # n = st.number_input("Кількість вузлів", min_value=1, value=10)
+        n = st.number_input("Кількість вузлів", min_value=2, value=10, key="auto_n")
 
-        # if graph_type in ["Fast GNP Random Graph", "GNP Random Graph"]:
-        #     p = st.slider("Ймовірність з'єднання", min_value=0.0, max_value=1.0, value=0.1)
-        #     params = (n, p)
-        # elif graph_type == "Barabasi-Albert Graph":
-        #     m = st.slider("Кількість підключень нового вузла", min_value=1, max_value=max(1, n - 1), value=1)
-        #     params = (n, m)
-        # elif graph_type == "Scale-Free Graph":
-        #     params = (n,)
-        # else:
-        #     params = (n,)
+        if graph_type == "Small-World Graph":
+            k = st.slider("Кількість найближчих сусідів (k)", min_value=1, max_value=n - 1, value=min(4, n - 1), key="auto_k")
+            p = st.slider("Ймовірність перез'єднання (p)", min_value=0.0, max_value=1.0, value=0.1, key="auto_p")
+            params = (n, k, p)
+        elif graph_type == "Scale-Free Graph":
+            params = (n,)
+        else:
+            params = (n,)
 
-        # submitted = st.form_submit_button("Згенерувати мережу")
+        submitted = st.form_submit_button("Згенерувати мережу")
 
-        # if submitted:
-        #     if graph_type == "Fast GNP Random Graph":
-        #         G = nx.fast_gnp_random_graph(*params, seed=42)
-        #     elif graph_type == "GNP Random Graph":
-        #         G = nx.gnp_random_graph(*params, seed=42)
-        #     elif graph_type == "Barabasi-Albert Graph":
-        #         G = nx.barabasi_albert_graph(*params, seed=42)
-        #     elif graph_type == "Scale-Free Graph":
-        #         G = nx.scale_free_graph(*params, seed=42).to_undirected()
-        #     else:
-        #         G = nx.empty_graph(n)
-
-
-        #     st.session_state["graph"] = G
-
-        #     st.success("Натиснули кнопку для створення автоматичного графа")
-        #     st.session_state["graph_generation_method"] = "auto"
+        if submitted:
+            generator = generator_factory.get_generator(graph_type)
+            if generator:
+                G = generator(*params)
+                st.session_state.antag_simulation = AntagonisticSpreadModel(G)
+                st.session_state["antag_srcs__graph_generation_method"] = "auto"
+                st.success("Граф успішно згенеровано.")
+            else:
+                st.error("Невідомий тип графа.")
 
 
 if st.session_state.antag_srcs__graph_generation_method is not None:
@@ -217,7 +206,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
             total_sources_A_allocated = 0
 
-            if st.session_state["antag_scrs__are_clusters"]:
+            if st.session_state.antag_srcs__graph_generation_method == "custom" and st.session_state.antag_scrs__are_clusters:
                 cluster_config = st.session_state.get("antag_scrs__cluster_config", {})
                 cluster_sizes = cluster_config.get("sizes", [])
                 remaining = cluster_config.get("remaining", 0)
@@ -260,7 +249,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
             total_sources_B_allocated = 0
 
-            if st.session_state["antag_scrs__are_clusters"]:
+            if st.session_state.antag_srcs__graph_generation_method == "custom" and st.session_state.antag_scrs__are_clusters:
                 cluster_config = st.session_state.get("antag_scrs__cluster_config", {})
                 cluster_sizes = cluster_config.get("sizes", [])
                 remaining = cluster_config.get("remaining", 0)
@@ -293,7 +282,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
 
     if st.session_state.get("sources_A_saved") and st.session_state.get("sources_B_saved"):
-        if st.session_state.antag__use_clusters == "Так":
+        if st.session_state.antag_srcs__graph_generation_method == "custom" and st.session_state.antag__use_clusters == "Так":
             cluster_map = st.session_state.get("antag_srcs__cluster_map", {})
             cluster_config = st.session_state.get("antag_scrs__cluster_config", {})
             total_nodes = st.session_state.antag_simulation.get_num_nodes()
