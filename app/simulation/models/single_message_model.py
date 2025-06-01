@@ -8,15 +8,18 @@ import matplotlib.pyplot as plt
 from simulation.models.state_enums import State, STATE2COLOR
 
 class SingleMessageSpreadModel:
-    def __init__(self, graph, source_nodes):
+    def __init__(self, graph):
         self.graph = graph
-        if isinstance(source_nodes, int):
+        self.source_nodes = []
+
+    def initialize(self, source_nodes=None):
+        if source_nodes is None:
+            self.source_nodes = []
+        elif isinstance(source_nodes, int):
             self.source_nodes = [source_nodes]
         else:
             self.source_nodes = list(source_nodes)
 
-
-    def initialize(self):
         for node in self.graph.nodes:
             if node in self.source_nodes:
                 self.graph.nodes[node]["state"] = State.SOURCE
@@ -27,74 +30,33 @@ class SingleMessageSpreadModel:
         return self.graph
 
 
-    # def update_state(self, graph_copy, node):
-    #     successors = set(self.graph.neighbors(node))
-    #     predecessors = set(nx.all_neighbors(self.graph, node)) - successors
-    #     state = self.graph.nodes[node]["state"]
-
-    #     if state == State.SOURCE:
-    #         return
-
-    #     elif state == State.RECOVERED:
-    #         condition = np.random.random()
-    #         if self.graph.nodes[node]["resistance"] > condition:
-    #             self.graph.nodes[node]["resistance"] = min(
-    #                 self.graph.nodes[node]["resistance"] * 2,
-    #                 self.graph.nodes[node]["resistance"] + np.random.random(),
-    #                 1
-    #             )
-    #         else:
-    #             graph_copy.nodes[node]["state"] = State.SUSCEPTIBLE
-
-    #     elif state == State.SUSCEPTIBLE:
-    #         source_influenced = State.SOURCE in [graph_copy.nodes[pre]["state"] for pre in predecessors]
-    #         infected_influenced = State.INFECTED in [graph_copy.nodes[pre]["state"] for pre in predecessors]
-    #         if source_influenced or infected_influenced:
-    #             condition = np.random.random()
-    #             if self.graph.nodes[node]["resistance"] < condition:
-    #                 graph_copy.nodes[node]["state"] = State.INFECTED
-
-    #     elif state == State.INFECTED:
-    #         condition = np.random.random()
-    #         if self.graph.nodes[node]["resistance"] > condition:
-    #             graph_copy.nodes[node]["state"] = State.RECOVERED
-    #         else:
-    #             self.graph.nodes[node]["resistance"] = max(
-    #                 self.graph.nodes[node]["resistance"] / 2,
-    #                 self.graph.nodes[node]["resistance"] - np.random.random()
-    #             )
-    #     else:
-    #         print("Unsupported state, exit.")
+    def get_num_nodes(self):
+        return self.graph.number_of_nodes()
 
 
-    # def run_until_convergence(self, max_steps=100):
-    #     for _ in range(max_steps):
-    #         graph_copy = copy.deepcopy(self.graph)
-    #         changed = False
-    #         for node in self.graph.nodes:
-    #             prev_state = graph_copy.nodes[node]["state"]
-    #             self.update_state(graph_copy, node)
-    #             if self.graph.nodes[node]["state"] != prev_state:
-    #                 changed = True
-    #         if not changed:
-    #             break
+    def get_num_sources(self):
+        return len(self.source_nodes)
+
+
+    def visualize(self, container, step=None):
+        """Візуалізація поточного стану графа"""
+        fig, ax = plt.subplots()
+        pos = nx.spring_layout(self.graph, seed=42)
+        node_colors = [
+            STATE2COLOR.get(self.graph.nodes[n].get("state", State.SUSCEPTIBLE), "lightsteelblue")
+            for n in self.graph.nodes
+        ]
+        nx.draw(self.graph, pos, node_color=node_colors, edgecolors="black", node_size=500)
+        nx.draw_networkx_labels(self.graph, pos, font_color="black", font_size=10)
+        if step is not None:
+            plt.title(f"Крок {step}")
+        container.pyplot(fig)
+        plt.close(fig)
 
 
 
-    # def visualize_model(self):
-    #     G = self.graph
 
-    #     pos = nx.spring_layout(G, seed=42)  
-    #     node_colors = [
-    #         STATE2COLOR.get(G.nodes[n].get("state", State.SUSCEPTIBLE), "lightsteelblue")
-    #         for n in G.nodes
-    #     ]
-
-    #     nx.draw(G, pos, node_color=node_colors, edgecolors="black", node_size=500)
-    #     st.pyplot(plt.gcf())
-    #     plt.clf()
-
-
+# ----- FOR OLD PAGE -----
 
 def visualize_graph(G, container, step=None):
     fig, ax = plt.subplots()
@@ -113,18 +75,6 @@ def visualize_graph(G, container, step=None):
     plt.close(fig)  # ✅ ЗАКРИВАЄМО, щоб не накопичувались фігури
 
 
-    # def plot_state_dynamics(state_counts, total_steps):
-    #     fig, ax = plt.subplots()
-    #     for state, counts in state_counts.items():
-    #         ax.plot(counts, label=state.name, color=STATE2COLOR[state], linewidth=2)
-
-    #     ax.set_xlim(0, total_steps - 1)
-    #     ax.set_xlabel("Крок")
-    #     ax.set_ylabel("Кількість вузлів")
-    #     ax.grid(True)
-    #     ax.legend()
-    #     st.pyplot(fig)
-    #     plt.close(fig)
 
 
 def plot_state_dynamics(state_counts, container, total_steps):

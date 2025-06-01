@@ -29,9 +29,15 @@ class FlexibleGraphBuilder:
         cluster_nodes = []
 
         # Створюємо кластери
-        for size, prob in zip(cluster_sizes, cluster_probs):
+        # for size, prob in zip(cluster_sizes, cluster_probs):
+        for cluster_id, (size, prob) in enumerate(zip(cluster_sizes, cluster_probs)):
+
             nodes = list(range(current_node, current_node + size))
             self.graph.add_nodes_from(nodes)
+
+            for node in nodes:
+                self.graph.nodes[node]["cluster"] = cluster_id
+
             for i in nodes:
                 for j in nodes:
                     if i != j and random.random() < prob:
@@ -47,6 +53,7 @@ class FlexibleGraphBuilder:
         if remaining_strategy == RemainingNodeStrategy.RANDOM:
             for node in remaining_nodes:
                 self.graph.add_node(node)
+                self.graph.nodes[node]["cluster"] = "around"
                 cluster = random.choice(cluster_nodes)
                 for target in cluster:
                     if random.random() < external_prob:
@@ -54,6 +61,10 @@ class FlexibleGraphBuilder:
                     if random.random() < external_prob:
                         self.graph.add_edge(target, node)
         elif remaining_strategy == RemainingNodeStrategy.SEPARATE:
+            for node in remaining_nodes:
+                self.graph.add_node(node)
+                self.graph.nodes[node]["cluster"] = "around"
+
             for i in range(len(remaining_nodes)):
                 for j in range(len(remaining_nodes)):
                     if i != j and random.random() < external_prob:
@@ -70,3 +81,16 @@ class FlexibleGraphBuilder:
                             self.graph.add_edge(node_j, node_i)
 
         return self.graph
+
+    def get_cluster_map(self):
+        cluster_map = {}
+        for node in self.graph.nodes:
+            # cluster = self.graph.nodes[node].get("cluster", "невідомо")
+            cluster = self.graph.nodes[node].get("cluster")
+            cluster_map.setdefault(cluster, []).append(node)
+
+        # Сортуємо кожен список вузлів усередині кластерів
+        for key in cluster_map:
+            cluster_map[key].sort()
+
+        return cluster_map

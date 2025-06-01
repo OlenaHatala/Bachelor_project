@@ -71,7 +71,9 @@ with col2:
 
 
 if st.session_state.graph is not None:
-    simulator = SingleMessageSpreadModel(st.session_state.graph, source_nodes=[])
+    # simulator = SingleMessageSpreadModel(st.session_state.graph, source_nodes=[])
+    simulator = SingleMessageSpreadModel(st.session_state.graph)
+
     visualize_graph(simulator.graph, graph_container)
 
     with st.popover("Налаштування симуляції"):
@@ -103,8 +105,9 @@ if st.session_state.graph is not None:
             all_nodes = list(G.nodes)
             selected_sources = random.sample(all_nodes, num_sources)
 
-            simulator = SingleMessageSpreadModel(G, selected_sources)
-            G = simulator.initialize()
+            # simulator = SingleMessageSpreadModel(G, selected_sources)
+            simulator = SingleMessageSpreadModel(G)
+            G = simulator.initialize(selected_sources)
             visualize_graph(G, graph_container)  
 
             st.session_state.graph = G

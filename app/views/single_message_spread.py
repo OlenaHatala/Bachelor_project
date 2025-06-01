@@ -7,6 +7,8 @@ import random
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
 from simulation.models.single_message_model import SingleMessageSpreadModel
 from utils.graph_visualization import visualize_graph
+from utils.graph_utils import assign_random_sources_from_clusters
+
 
 st.set_page_config(layout="centered")
 st.title("Модель поширення інформації від однорідних джерел")
@@ -15,52 +17,56 @@ if "graph_generation_method" not in st.session_state:
     st.session_state["graph_generation_method"] = None
 if "graph" not in st.session_state:
     st.session_state["graph"] = None
+if "are_clusters" not in st.session_state:
+    st.session_state["are_clusters"] = None
+if "cluster_config" not in st.session_state:
+    st.session_state["cluster_config"] = None
+if "source_distribution" not in st.session_state:
+    st.session_state["source_distribution"] = None
+if "outside_sources" not in st.session_state:
+    st.session_state["outside_sources"] = None
+if "cluster_map" not in st.session_state:
+    st.session_state["cluster_map"] = None
 
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
 with tab1:
-
     use_clusters = st.radio(
         label="**Створювати кластери при побудові графа?**",
         options=["Так", "Ні"],
-        index=1,
+        index=0,
         horizontal=True
     )
 
     with st.form("custom_graph_form"):
-        total_nodes = st.number_input("Загальна кількість вузлів", min_value=1, value=2, step=1)
-        
+        total_nodes = st.number_input("Загальна кількість вузлів", min_value=1, value=4, step=1)
 
         cluster_sizes = []
         cluster_probs = []
-        # remaining = total_nodes
         num_clusters = 0
         external_prob = 0.0
         remaining = 0
         add_remaining = "немає залишкових вузлів"
 
         if use_clusters == "Так":
-            num_clusters = st.number_input("Кількість кластерів", min_value=1, max_value=total_nodes, value=2, step=1)
+            st.session_state["are_clusters"] = True
 
-            # st.markdown("**Налаштування кластерів**")
+            num_clusters = st.number_input("Кількість кластерів", min_value=1, max_value=total_nodes, value=2, step=1)
 
             total_assigned = 0  
 
             for i in range(int(num_clusters)):
-                # st.markdown(f"**Налаштування кластера №{i+1}**")
                 st.markdown(
                     f"<div style='margin-bottom: 0.2rem; font-weight: 600;'>Налаштування кластера №{i+1}</div>",
                     unsafe_allow_html=True
                 )
-                # st.markdown(f"<div class='cluster-title'>Налаштування кластера №{i+1}</div>", unsafe_allow_html=True)
 
                 cols = st.columns(2)
                 with cols[0]:
                     max_available = total_nodes - total_assigned
-                    default_value = min(1, max_available) if max_available > 0 else 0
+                    default_value = min(2, max_available) if max_available > 0 else 0
                     size = st.number_input(
-                        # f"Кількість вузлів у кластері №{i+1}",
                         f"Кількість вузлів",
                         min_value=0,
                         max_value=total_nodes,
@@ -69,7 +75,6 @@ with tab1:
                     )
                 with cols[1]:
                     prob = st.slider(
-                        # f"Ймовірність з'єднання у кластері №{i+1}",
                         f"Ймовірність з'єднання",
                         min_value=0.0,
                         max_value=1.0,
@@ -93,12 +98,12 @@ with tab1:
                 value=0.05
             )
 
-
             if remaining > 0:
                 add_remaining = st.radio(
                     label="Що робити з залишковими вузлами?",
                     options=["Додати до кластерів випадково", "Залишити окремо"],
-                    index=0
+                    index=1,
+                    key="add_remaining"
                 )
 
                 external_prob = st.slider(
@@ -106,9 +111,11 @@ with tab1:
                     0.0, 1.0, 0.2
                 )
 
-
         else:
+            st.session_state["are_clusters"] = False
+
             general_prob = st.slider("Ймовірність з'єднання між усіма вузлами", 0.0, 1.0, 0.1)
+            
 
         submit_custom = st.form_submit_button("Згенерувати мережу")
 
@@ -122,6 +129,13 @@ with tab1:
                     else RemainingNodeStrategy.SEPARATE
                 )
 
+                st.session_state["cluster_config"] = {
+                    "num_clusters": num_clusters,
+                    "sizes": cluster_sizes,
+                    "remaining": remaining,
+                    "add_remaining": add_remaining
+                }
+
                 G = builder.build_clustered_graph(
                     cluster_sizes=cluster_sizes,
                     cluster_probs=cluster_probs,
@@ -129,20 +143,24 @@ with tab1:
                     remaining_strategy=strategy,
                     external_prob=external_prob
                 )
+
+                print("\nПриналежність вузлів до кластерів")
+                cluster_map = builder.get_cluster_map()
+                st.session_state["cluster_map"] = cluster_map
+
+                for cluster_id in sorted(cluster_map.keys(), key=lambda x: (999 if x == "around" else x)):
+                    if cluster_id == "around":
+                        print("**Залишкові вузли (поза кластерами):**", sorted(cluster_map[cluster_id]))
+                    else:
+                        print(f"**Кластер {cluster_id}:**", sorted(cluster_map[cluster_id]))
+
             else:
                 G = builder.build_flat_graph(general_prob)
 
             st.session_state["graph"] = G
 
-            # st.success(f"Граф успішно згенеровано: {G.number_of_nodes()} вузлів, {G.number_of_edges()} ребер")
             st.success("Натиснули кнопку для створення налаштованого графа")
             st.session_state["graph_generation_method"] = "custom"
-
-            # pos = nx.spring_layout(G, seed=42)
-            # fig, ax = plt.subplots()
-            # nx.draw(G, pos, node_color='lightblue', edge_color='gray', node_size=500)
-            # st.pyplot(fig)
-
 
 with tab2:
     with st.form("auto_graph_form"):
@@ -182,29 +200,76 @@ with tab2:
 
             st.session_state["graph"] = G
 
-            # st.success(f"Граф згенеровано: {G.number_of_nodes()} вузлів, {G.number_of_edges()} ребер")
             st.success("Натиснули кнопку для створення автоматичного графа")
-            # pos = nx.spring_layout(G, seed=42)
-            # fig, ax = plt.subplots()
-            # nx.draw(G, pos, node_color='lightblue', edge_color='gray', node_size=500)
-            # st.pyplot(fig)
             st.session_state["graph_generation_method"] = "auto"
 
+print("\n")
 
 if st.session_state.graph_generation_method is not None:
     G = st.session_state.get("graph", None)
-    # st.session_state["simulator"] = SingleMessageSpreadModel(G, [])
-    simulation = SingleMessageSpreadModel(G, [])
+    simulation = SingleMessageSpreadModel(G)
+    simulation.initialize()
 
     if G is not None:
-        st.subheader("Візуалізація збереженого графа")
-        visualize_graph(simulation.graph, st)
+        with st.popover("Налаштування симуляції"):
+            st.number_input(
+                "Загальна кількість джерел",
+                min_value=1,
+                max_value=simulation.get_num_nodes(),
+                value=1,
+                key="total_sources"
+            )
 
+            if st.session_state.graph_generation_method == "custom" and st.session_state.are_clusters:
+                cluster_config = st.session_state.get("cluster_config", {})
+                num_clusters = cluster_config.get("num_clusters", 0)
+                cluster_sizes = cluster_config.get("sizes", [])
+                remaining = cluster_config.get("remaining", 0)
+                
+                total_sources_allocated = 0
 
+                for i, size in enumerate(cluster_sizes):
+                    st.number_input(
+                        f"Кількість джерел у кластері №{i+1}",
+                        min_value=0,
+                        max_value=size,
+                        value=0,
+                        key=f"source_cluster_{i}"
+                    )
+                    total_sources_allocated += st.session_state.get(f"source_cluster_{i}", 0)
 
-    # if st.session_state.graph_generation_method == "custom":
-    #     pass
+                if remaining > 0 and st.session_state.add_remaining == "Залишити окремо":
+                    st.number_input(
+                        "Кількість джерел серед залишкових вузлів",
+                        min_value=0,
+                        max_value=remaining,
+                        value=0,
+                        key="outside_sources"
+                    )
+                    if st.session_state.get("outside_sourses") is not None:
+                        total_sources_allocated += st.session_state.get("outside_sources", 0)
 
-    # if st.session_state.graph_generation_method == "auto":
-    #     pass
-    
+                if total_sources_allocated > st.session_state["total_sources"]:
+                    st.error(f"⚠️ Загальна кількість джерел у кластерах ({total_sources_allocated}) перевищує допустиму ({st.session_state['total_sources']})")
+
+            if st.button("Зберегти"):
+
+                if st.session_state.graph_generation_method == "custom" and st.session_state.are_clusters:
+                    num_clusters = st.session_state["cluster_config"]["num_clusters"]
+                    
+                    source_distribution = [
+                        st.session_state.get(f"source_cluster_{i}", 0) for i in range(num_clusters)
+                    ]
+                    outside_sources = st.session_state.get("outside_sources", 0)
+                    st.session_state["source_distribution"] = source_distribution
+                
+                    print(f"source_distribution = {source_distribution}")
+                    print(f"outside_sources = {outside_sources}")
+
+                    selected_sources = assign_random_sources_from_clusters(st.session_state["cluster_map"], source_distribution, outside_sources)
+                    print("----CHOOSEN----")
+                    print(selected_sources)
+
+                    simulation.initialize(selected_sources)
+
+        simulation.visualize(st)
