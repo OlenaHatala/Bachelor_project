@@ -3,6 +3,18 @@ import networkx as nx
 from simulation.models.state_enums import SingleSourceState, SINGLE_STATE2COLOR
 import plotly.graph_objects as go
 
+def safe_visualize(simulation, container, max_nodes=30, step=None):
+    num_nodes = simulation.get_num_nodes()
+    if num_nodes <= max_nodes:
+        simulation.visualize(container, step=step)
+        return True
+    else:
+        # container.info(
+        #     f"⚠️ Граф має {num_nodes} вузлів. "
+        #     f"Візуалізація відключена для графів із понад {max_nodes} вузлами, "
+        #     "оскільки вона значно сповільнює оновлення сторінки."
+        # )
+        return False
 
 def visualize_graph(G, container, step=None, node_colors=None):
     fig, ax = plt.subplots()

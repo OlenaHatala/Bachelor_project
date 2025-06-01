@@ -8,7 +8,7 @@ import time
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
 from simulation.generators.graph_factory import GraphGeneratorFactory 
 from simulation.models.single_message_model import SingleMessageSpreadModel
-from utils.graph_visualization import visualize_graph, plot_state_dynamics, plot_pie_chart
+from utils.graph_visualization import visualize_graph, plot_state_dynamics, plot_pie_chart, safe_visualize
 from utils.graph_utils import assign_random_sources_from_clusters
 from simulation.models.state_enums import SINGLE_STATE2COLOR
 
@@ -38,6 +38,21 @@ if "simulation_mode" not in st.session_state:
     st.session_state["simulation_mode"] = None
 if "simulation_steps" not in st.session_state:
     st.session_state["simulation_steps"] = None
+
+
+# def safe_visualize(simulation, container, max_nodes=30, step=None):
+#     num_nodes = simulation.get_num_nodes()
+#     if num_nodes <= max_nodes:
+#         simulation.visualize(container, step=step)
+#         return True
+#     else:
+#         # container.info(
+#         #     f"⚠️ Граф має {num_nodes} вузлів. "
+#         #     f"Візуалізація відключена для графів із понад {max_nodes} вузлами, "
+#         #     "оскільки вона значно сповільнює оновлення сторінки."
+#         # )
+#         return False
+
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
@@ -313,8 +328,9 @@ if st.session_state.graph_generation_method is not None:
                 st.session_state.simulation.step()
                 st.session_state.simulation_steps_run += 1
 
-                st.session_state.simulation.visualize(visualization_placeholder, st.session_state.simulation_steps_run)
-                
+                # st.session_state.simulation.visualize(visualization_placeholder, st.session_state.simulation_steps_run)
+                safe_visualize(st.session_state.simulation, visualization_placeholder, step=st.session_state.simulation_steps_run)
+
                 state_counts = st.session_state.simulation.state_counts  
                 state_count_now = st.session_state.simulation.state_count  
 
@@ -328,4 +344,6 @@ if st.session_state.graph_generation_method is not None:
             if st.session_state.simulation_steps_run == st.session_state.simulation_steps:
                 st.success("Симуляцію завершено — досягнуто максимальної кількості ітерацій.")
 
-            st.session_state.simulation.visualize(visualization_placeholder)
+            # st.session_state.simulation.visualize(visualization_placeholder)
+            safe_visualize(st.session_state.simulation, visualization_placeholder)
+

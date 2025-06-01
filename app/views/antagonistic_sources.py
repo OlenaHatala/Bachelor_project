@@ -8,7 +8,7 @@ from simulation.generators.graph_factory import GraphGeneratorFactory
 from simulation.models.antagonistic_spread_model import AntagonisticSpreadModel
 from utils.graph_utils import assign_sources_dual
 from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR
-from utils.graph_visualization import plot_pie_chart, plot_state_dynamics
+from utils.graph_visualization import plot_pie_chart, plot_state_dynamics, safe_visualize
 
 st.set_page_config(layout="centered")
 st.title("Модель впливу протилежних джерел у мережі")
@@ -383,7 +383,8 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
             st.session_state.antag_simulation.step()
             st.session_state.antag__simulation_steps_run += 1
 
-            st.session_state.antag_simulation.visualize(graph_placeholder, st.session_state.antag__simulation_steps_run)
+            # st.session_state.antag_simulation.visualize(graph_placeholder, st.session_state.antag__simulation_steps_run)
+            safe_visualize(st.session_state.antag_simulation, graph_placeholder, step=st.session_state.antag__simulation_steps_run)
 
             state_counts = st.session_state.antag_simulation.state_counts
             state_count_now = st.session_state.antag_simulation.state_count
@@ -398,4 +399,5 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
         if st.session_state.antag__simulation_steps_run == st.session_state.antag_simulation_steps:
             st.success("Симуляцію завершено — досягнуто максимальної кількості ітерацій.")
 
-    st.session_state.antag_simulation.visualize(graph_placeholder)
+    # st.session_state.antag_simulation.visualize(graph_placeholder)
+    safe_visualize(st.session_state.antag_simulation, graph_placeholder)
