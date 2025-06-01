@@ -106,7 +106,10 @@ class SingleMessageSpreadModel:
     def visualize(self, container, step=None):
         """Візуалізація поточного стану графа"""
         fig, ax = plt.subplots()
-        pos = nx.spring_layout(self.graph, seed=42)
+        try:
+            pos = nx.kamada_kawai_layout(self.graph)
+        except:
+            pos = nx.spring_layout(self.graph, seed=42)
         node_colors = [
             SINGLE_STATE2COLOR.get(self.graph.nodes[n].get("state", SingleSourceState.SUSCEPTIBLE), "lightsteelblue")
             for n in self.graph.nodes

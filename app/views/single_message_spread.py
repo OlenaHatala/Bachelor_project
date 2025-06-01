@@ -39,21 +39,6 @@ if "simulation_mode" not in st.session_state:
 if "simulation_steps" not in st.session_state:
     st.session_state["simulation_steps"] = None
 
-
-# def safe_visualize(simulation, container, max_nodes=30, step=None):
-#     num_nodes = simulation.get_num_nodes()
-#     if num_nodes <= max_nodes:
-#         simulation.visualize(container, step=step)
-#         return True
-#     else:
-#         # container.info(
-#         #     f"⚠️ Граф має {num_nodes} вузлів. "
-#         #     f"Візуалізація відключена для графів із понад {max_nodes} вузлами, "
-#         #     "оскільки вона значно сповільнює оновлення сторінки."
-#         # )
-#         return False
-
-
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
 with tab1:

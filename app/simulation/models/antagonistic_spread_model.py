@@ -118,7 +118,10 @@ class AntagonisticSpreadModel:
 
     def visualize(self, container, step=None):
         fig, ax = plt.subplots()
-        pos = nx.spring_layout(self.graph, seed=42)
+        try:
+            pos = nx.kamada_kawai_layout(self.graph)
+        except:
+            pos = nx.spring_layout(self.graph, seed=42)
 
         node_colors = [
             ANTAGONISTIC_STATE2COLOR.get(
