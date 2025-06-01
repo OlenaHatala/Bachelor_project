@@ -38,6 +38,12 @@ if "simulation_mode" not in st.session_state:
     st.session_state["simulation_mode"] = None
 if "simulation_steps" not in st.session_state:
     st.session_state["simulation_steps"] = None
+if "simulation_max_steps" not in st.session_state:
+    st.session_state["simulation_max_steps"] = None
+if "simulation_threshold" not in st.session_state:
+    st.session_state["simulation_threshold"] = None
+if "add_remaining" not in st.session_state:
+    st.session_state.add_remaining = None
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
@@ -58,6 +64,7 @@ with tab1:
         external_prob = 0.0
         remaining = 0
         # add_remaining = "немає залишкових вузлів"
+        # st.session_state.add_remaining = "Ніц нема"
 
         if use_clusters == "Так":
             st.session_state["are_clusters"] = True
@@ -268,39 +275,54 @@ if st.session_state.graph_generation_method is not None:
         with col2:
             with st.popover("Симуляція"):
                 if st.session_state["sources_choosen"]:
-                    mode = st.radio(
-                        "Оберіть режим симуляції:",
-                        options=[
-                            "Фіксована кількість ітерацій",
-                            "До досягнення рівноваги (з обмеженням)"
-                        ]
-                    )
-
+                    # mode = st.radio(
+                    #     "Оберіть режим симуляції:",
+                    #     options=[
+                    #         "Фіксована кількість ітерацій",
+                    #         "До досягнення стану рівноваги"
+                    #     ]
+                    # )
+                    mode = "Фіксована кількість ітерацій"
+                    
                     if mode == "Фіксована кількість ітерацій":
                         num_steps = st.number_input(
                             "Кількість ітерацій",
                             min_value=1,
                             max_value=1000,
                             value=10,
-                            step=1
+                            step=1,
+                            key="simulation_steps"
                         )
                         
-                    elif mode == "До досягнення рівноваги (з обмеженням)":
+                    elif mode == "До досягнення стану рівноваги":
+                        threshold = st.slider(
+                            "Поріг змін для зупинки симуляції (рівновага)",
+                            min_value=0.0,
+                            max_value=1.0,
+                            value=0.01,
+                            step=0.01,
+                            key="simulation_threshold"
+                        )
+                        
                         max_steps = st.number_input(
                             "Максимальна кількість ітерацій",
                             min_value=1,
                             max_value=10000,
                             value=50,
-                            step=1
+                            step=1,
+                            key="simulation_max_steps"
                         )
-                    
+
+                        verbose = st.checkbox("Показувати повідомлення про прогрес")
+
+
                     if st.button("Почати симуляцію"):
                         if mode == "Фіксована кількість ітерацій":
                             st.session_state["simulation_mode"] = "fixed"
-                            st.session_state["simulation_steps"] = num_steps
+                            # st.session_state["simulation_steps"] = num_steps
                         else:
                             st.session_state["simulation_mode"] = "equilibrium"
-                            st.session_state["simulation_max_steps"] = max_steps
+                            # st.session_state["simulation_max_steps"] = max_steps
 
                 else:
                     st.warning("❗ Спершу збережіть налаштування для джерел.")

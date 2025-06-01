@@ -28,7 +28,9 @@ if "antag_simulation_steps" not in st.session_state:
     st.session_state["antag_simulation_steps"] = None
 if "antag_simulation_max_steps" not in st.session_state:
     st.session_state["antag_simulation_max_steps"] = None
-
+if "antag_add_remaining" not in st.session_state:
+    st.session_state.antag_add_remaining = None
+    
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
 
@@ -203,7 +205,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
                 "Загальна кількість джерел A",
                 min_value=0,
                 max_value=st.session_state.antag_simulation.get_num_nodes(),
-                value=0,
+                value=1,
                 key="total_sources_A"
             )
 
@@ -246,7 +248,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
                 "Загальна кількість джерел B",
                 min_value=0,
                 max_value=st.session_state.antag_simulation.get_num_nodes(),
-                value=0,
+                value=1,
                 key="total_sources_B"
             )
 
@@ -335,13 +337,14 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
 
         with st.popover("Симуляція"):
-            mode = st.radio(
-                "Оберіть режим симуляції:",
-                options=[
-                    "Фіксована кількість ітерацій",
-                    "До досягнення рівноваги (з обмеженням)"
-                ]
-            )
+            # mode = st.radio(
+            #     "Оберіть режим симуляції:",
+            #     options=[
+            #         "Фіксована кількість ітерацій",
+            #         "До досягнення рівноваги (з обмеженням)"
+            #     ]
+            # )
+            mode = "Фіксована кількість ітерацій"
 
             if mode == "Фіксована кількість ітерацій":
                 num_steps = st.number_input(
