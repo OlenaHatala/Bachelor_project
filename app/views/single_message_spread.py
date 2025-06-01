@@ -3,6 +3,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import time
+
 
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
 from simulation.models.single_message_model import SingleMessageSpreadModel
@@ -31,7 +33,10 @@ if "sources_choosen" not in st.session_state:
     st.session_state["sources_choosen"] = False
 if "simulation_set_up" not in st.session_state:
     st.session_state["simulation_set_up"] = False
-
+if "simulation_mode" not in st.session_state:
+    st.session_state["simulation_mode"] = None
+if "simulation_steps" not in st.session_state:
+    st.session_state["simulation_steps"] = None
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
 
@@ -210,7 +215,7 @@ with tab2:
 print("\n")
 
 if st.session_state.graph_generation_method is not None:
-
+    st.session_state.simulation_steps_run = 0
     if st.session_state.simulation.graph is not None:
         col1, col2 = st.columns([1, 1])
         with col1:
@@ -305,7 +310,7 @@ if st.session_state.graph_generation_method is not None:
                             step=1
                         )
                     
-                    if st.button("Зберегти налаштування"):
+                    if st.button("Почати симуляцію"):
                         if mode == "Фіксована кількість ітерацій":
                             st.session_state["simulation_mode"] = "fixed"
                             st.session_state["simulation_steps"] = num_steps
@@ -318,4 +323,14 @@ if st.session_state.graph_generation_method is not None:
                     st.write("Оберіть джерела!")
 
 
-        st.session_state.simulation.visualize(st)
+        visualization_placeholder = st.empty()
+        if st.session_state.simulation_mode == "fixed":
+            for step in range(st.session_state.simulation_steps):
+                st.session_state.simulation.step()
+                st.session_state.simulation_steps_run += 1
+
+                st.session_state.simulation.visualize(visualization_placeholder, st.session_state.simulation_steps_run)
+                time.sleep(1)
+
+        if (st.session_state.simulation_mode is None or st.session_state.simulation_steps_run == st.session_state.simulation_steps):
+            st.session_state.simulation.visualize(visualization_placeholder)

@@ -38,6 +38,53 @@ class SingleMessageSpreadModel:
         return len(self.source_nodes)
 
 
+    def step(self):
+        graph_copy = self.graph.copy()
+        for node in self.graph.nodes:
+            self.update_node_state(graph_copy, node)
+        for node in self.graph.nodes:
+            self.graph.nodes[node]["state"] = graph_copy.nodes[node]["state"]
+
+
+    def update_node_state(self, graph_copy, node):
+        sg = self.graph
+        successors = set(sg.neighbors(node))
+        predecessors = set(nx.all_neighbors(sg, node)) - successors
+        state = sg.nodes[node]["state"]
+
+        if state == State.SOURCE:
+            return
+
+        elif state == State.RECOVERED:
+            condition = np.random.random()
+            if sg.nodes[node]["resistance"] > condition:
+                sg.nodes[node]["resistance"] = min(
+                    sg.nodes[node]["resistance"] * 2,
+                    sg.nodes[node]["resistance"] + np.random.random(),
+                    1
+                )
+            else:
+                graph_copy.nodes[node]["state"] = State.SUSCEPTIBLE
+
+        elif state == State.SUSCEPTIBLE:
+            source_influenced = State.SOURCE in [graph_copy.nodes[pre]["state"] for pre in predecessors]
+            infected_influenced = State.INFECTED in [graph_copy.nodes[pre]["state"] for pre in predecessors]
+            if source_influenced or infected_influenced:
+                condition = np.random.random()
+                if sg.nodes[node]["resistance"] < condition:
+                    graph_copy.nodes[node]["state"] = State.INFECTED
+
+        elif state == State.INFECTED:
+            condition = np.random.random()
+            if sg.nodes[node]["resistance"] > condition:
+                graph_copy.nodes[node]["state"] = State.RECOVERED
+            else:
+                sg.nodes[node]["resistance"] = max(
+                    sg.nodes[node]["resistance"] / 2,
+                    sg.nodes[node]["resistance"] - np.random.random()
+                )
+
+
     def visualize(self, container, step=None):
         """Візуалізація поточного стану графа"""
         fig, ax = plt.subplots()
