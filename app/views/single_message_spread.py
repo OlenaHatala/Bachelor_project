@@ -27,6 +27,10 @@ if "outside_sources" not in st.session_state:
     st.session_state["outside_sources"] = None
 if "cluster_map" not in st.session_state:
     st.session_state["cluster_map"] = None
+if "sources_choosen" not in st.session_state:
+    st.session_state["sources_choosen"] = False
+if "simulation_set_up" not in st.session_state:
+    st.session_state["simulation_set_up"] = False
 
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
@@ -157,7 +161,7 @@ with tab1:
             else:
                 G = builder.build_flat_graph(general_prob)
 
-            st.session_state["graph"] = G
+            st.session_state.simulation = SingleMessageSpreadModel(G)
 
             st.success("Натиснули кнопку для створення налаштованого графа")
             st.session_state["graph_generation_method"] = "custom"
@@ -206,70 +210,112 @@ with tab2:
 print("\n")
 
 if st.session_state.graph_generation_method is not None:
-    G = st.session_state.get("graph", None)
-    simulation = SingleMessageSpreadModel(G)
-    simulation.initialize()
 
-    if G is not None:
-        with st.popover("Налаштування симуляції"):
-            st.number_input(
-                "Загальна кількість джерел",
-                min_value=1,
-                max_value=simulation.get_num_nodes(),
-                value=1,
-                key="total_sources"
-            )
-
-            if st.session_state.graph_generation_method == "custom" and st.session_state.are_clusters:
-                cluster_config = st.session_state.get("cluster_config", {})
-                num_clusters = cluster_config.get("num_clusters", 0)
-                cluster_sizes = cluster_config.get("sizes", [])
-                remaining = cluster_config.get("remaining", 0)
-                
-                total_sources_allocated = 0
-
-                for i, size in enumerate(cluster_sizes):
-                    st.number_input(
-                        f"Кількість джерел у кластері №{i+1}",
-                        min_value=0,
-                        max_value=size,
-                        value=0,
-                        key=f"source_cluster_{i}"
-                    )
-                    total_sources_allocated += st.session_state.get(f"source_cluster_{i}", 0)
-
-                if remaining > 0 and st.session_state.add_remaining == "Залишити окремо":
-                    st.number_input(
-                        "Кількість джерел серед залишкових вузлів",
-                        min_value=0,
-                        max_value=remaining,
-                        value=0,
-                        key="outside_sources"
-                    )
-                    if st.session_state.get("outside_sourses") is not None:
-                        total_sources_allocated += st.session_state.get("outside_sources", 0)
-
-                if total_sources_allocated > st.session_state["total_sources"]:
-                    st.error(f"⚠️ Загальна кількість джерел у кластерах ({total_sources_allocated}) перевищує допустиму ({st.session_state['total_sources']})")
-
-            if st.button("Зберегти"):
+    if st.session_state.simulation.graph is not None:
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            with st.popover("Обрати джерела"):
+                st.number_input(
+                    "Загальна кількість джерел",
+                    min_value=1,
+                    max_value=st.session_state.simulation.get_num_nodes(),
+                    value=1,
+                    key="total_sources"
+                )
 
                 if st.session_state.graph_generation_method == "custom" and st.session_state.are_clusters:
-                    num_clusters = st.session_state["cluster_config"]["num_clusters"]
+                    cluster_config = st.session_state.get("cluster_config", {})
+                    num_clusters = cluster_config.get("num_clusters", 0)
+                    cluster_sizes = cluster_config.get("sizes", [])
+                    remaining = cluster_config.get("remaining", 0)
                     
-                    source_distribution = [
-                        st.session_state.get(f"source_cluster_{i}", 0) for i in range(num_clusters)
-                    ]
-                    outside_sources = st.session_state.get("outside_sources", 0)
-                    st.session_state["source_distribution"] = source_distribution
-                
-                    print(f"source_distribution = {source_distribution}")
-                    print(f"outside_sources = {outside_sources}")
+                    total_sources_allocated = 0
 
-                    selected_sources = assign_random_sources_from_clusters(st.session_state["cluster_map"], source_distribution, outside_sources)
-                    print("----CHOOSEN----")
-                    print(selected_sources)
+                    for i, size in enumerate(cluster_sizes):
+                        st.number_input(
+                            f"Кількість джерел у кластері №{i+1}",
+                            min_value=0,
+                            max_value=size,
+                            value=0,
+                            key=f"source_cluster_{i}"
+                        )
+                        total_sources_allocated += st.session_state.get(f"source_cluster_{i}", 0)
 
-                    simulation.initialize(selected_sources)
+                    if remaining > 0 and st.session_state.add_remaining == "Залишити окремо":
+                        st.number_input(
+                            "Кількість джерел серед залишкових вузлів",
+                            min_value=0,
+                            max_value=remaining,
+                            value=0,
+                            key="outside_sources"
+                        )
+                        if st.session_state.get("outside_sourses") is not None:
+                            total_sources_allocated += st.session_state.get("outside_sources", 0)
 
-        simulation.visualize(st)
+                    if total_sources_allocated > st.session_state["total_sources"]:
+                        st.error(f"⚠️ Загальна кількість джерел у кластерах ({total_sources_allocated}) перевищує допустиму ({st.session_state['total_sources']})")
+
+                if st.button("Зберегти"):
+                    st.session_state["sources_choosen"] = True
+                    if st.session_state.graph_generation_method == "custom" and st.session_state.are_clusters:
+                        num_clusters = st.session_state["cluster_config"]["num_clusters"]
+                        
+                        source_distribution = [
+                            st.session_state.get(f"source_cluster_{i}", 0) for i in range(num_clusters)
+                        ]
+                        outside_sources = st.session_state.get("outside_sources", 0)
+                        st.session_state["source_distribution"] = source_distribution
+                    
+                        print(f"source_distribution = {source_distribution}")
+                        print(f"outside_sources = {outside_sources}")
+
+                        selected_sources = assign_random_sources_from_clusters(st.session_state["cluster_map"], source_distribution, outside_sources)
+                        print("----CHOOSEN----")
+                        print(selected_sources)
+
+                        st.session_state.simulation.initialize(selected_sources)
+
+
+        with col2:
+            with st.popover("Симуляція"):
+                if st.session_state["sources_choosen"]:
+                    mode = st.radio(
+                        "Оберіть режим симуляції:",
+                        options=[
+                            "Фіксована кількість ітерацій",
+                            "До досягнення рівноваги (з обмеженням)"
+                        ]
+                    )
+
+                    if mode == "Фіксована кількість ітерацій":
+                        num_steps = st.number_input(
+                            "Кількість ітерацій",
+                            min_value=1,
+                            max_value=1000,
+                            value=10,
+                            step=1
+                        )
+                        
+                    elif mode == "До досягнення рівноваги (з обмеженням)":
+                        max_steps = st.number_input(
+                            "Максимальна кількість ітерацій",
+                            min_value=1,
+                            max_value=10000,
+                            value=50,
+                            step=1
+                        )
+                    
+                    if st.button("Зберегти налаштування"):
+                        if mode == "Фіксована кількість ітерацій":
+                            st.session_state["simulation_mode"] = "fixed"
+                            st.session_state["simulation_steps"] = num_steps
+                        else:
+                            st.session_state["simulation_mode"] = "equilibrium"
+                            st.session_state["simulation_max_steps"] = max_steps
+
+                else:
+                    st.write("Неможливо налаштувати та почати симуляцію.")
+                    st.write("Оберіть джерела!")
+
+
+        st.session_state.simulation.visualize(st)
