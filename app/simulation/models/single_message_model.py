@@ -4,6 +4,9 @@ import copy
 import networkx as nx
 import streamlit as st
 import matplotlib.pyplot as plt
+from collections import defaultdict, Counter
+import plotly.graph_objects as go
+
 
 from simulation.models.state_enums import State, STATE2COLOR
 
@@ -11,6 +14,8 @@ class SingleMessageSpreadModel:
     def __init__(self, graph):
         self.graph = graph
         self.source_nodes = []
+        self.state_counts = defaultdict(list)  
+        self.state_count = {}  
 
     def initialize(self, source_nodes=None):
         if source_nodes is None:
@@ -27,6 +32,8 @@ class SingleMessageSpreadModel:
             else:
                 self.graph.nodes[node]["state"] = State.SUSCEPTIBLE
                 self.graph.nodes[node]["resistance"] = np.random.random()
+
+        self.update_state_tracking()
         return self.graph
 
 
@@ -44,6 +51,8 @@ class SingleMessageSpreadModel:
             self.update_node_state(graph_copy, node)
         for node in self.graph.nodes:
             self.graph.nodes[node]["state"] = graph_copy.nodes[node]["state"]
+
+        self.update_state_tracking()
 
 
     def update_node_state(self, graph_copy, node):
@@ -85,6 +94,15 @@ class SingleMessageSpreadModel:
                 )
 
 
+    def update_state_tracking(self):
+        """Оновлює історію та поточні підрахунки станів"""
+        count = Counter([self.graph.nodes[n]["state"] for n in self.graph.nodes])
+        self.state_count = dict(count)  # для кругової діаграми
+
+        for state in State:
+            self.state_counts[state].append(count.get(state, 0))  # для лінійного графіка
+
+
     def visualize(self, container, step=None):
         """Візуалізація поточного стану графа"""
         fig, ax = plt.subplots()
@@ -94,7 +112,7 @@ class SingleMessageSpreadModel:
             for n in self.graph.nodes
         ]
         nx.draw(self.graph, pos, node_color=node_colors, edgecolors="black", node_size=500)
-        nx.draw_networkx_labels(self.graph, pos, font_color="black", font_size=10)
+        # nx.draw_networkx_labels(self.graph, pos, font_color="black", font_size=10)
         if step is not None:
             plt.title(f"Крок {step}")
         container.pyplot(fig)

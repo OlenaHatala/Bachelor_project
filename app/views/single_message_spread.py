@@ -8,7 +8,7 @@ import time
 
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
 from simulation.models.single_message_model import SingleMessageSpreadModel
-from utils.graph_visualization import visualize_graph
+from utils.graph_visualization import visualize_graph, plot_state_dynamics, plot_pie_chart
 from utils.graph_utils import assign_random_sources_from_clusters
 
 
@@ -153,15 +153,17 @@ with tab1:
                     external_prob=external_prob
                 )
 
-                print("\nПриналежність вузлів до кластерів")
-                cluster_map = builder.get_cluster_map()
-                st.session_state["cluster_map"] = cluster_map
+                # print("\nПриналежність вузлів до кластерів")
+                # cluster_map = builder.get_cluster_map()
+                # st.session_state["cluster_map"] = cluster_map
 
-                for cluster_id in sorted(cluster_map.keys(), key=lambda x: (999 if x == "around" else x)):
-                    if cluster_id == "around":
-                        print("**Залишкові вузли (поза кластерами):**", sorted(cluster_map[cluster_id]))
-                    else:
-                        print(f"**Кластер {cluster_id}:**", sorted(cluster_map[cluster_id]))
+                st.session_state["cluster_map"] = builder.get_cluster_map()
+
+                # for cluster_id in sorted(cluster_map.keys(), key=lambda x: (999 if x == "around" else x)):
+                #     if cluster_id == "around":
+                #         print("**Залишкові вузли (поза кластерами):**", sorted(cluster_map[cluster_id]))
+                #     else:
+                #         print(f"**Кластер {cluster_id}:**", sorted(cluster_map[cluster_id]))
 
             else:
                 G = builder.build_flat_graph(general_prob)
@@ -212,7 +214,7 @@ with tab2:
             st.success("Натиснули кнопку для створення автоматичного графа")
             st.session_state["graph_generation_method"] = "auto"
 
-print("\n")
+# print("\n")
 
 if st.session_state.graph_generation_method is not None:
     st.session_state.simulation_steps_run = 0
@@ -271,12 +273,12 @@ if st.session_state.graph_generation_method is not None:
                         outside_sources = st.session_state.get("outside_sources", 0)
                         st.session_state["source_distribution"] = source_distribution
                     
-                        print(f"source_distribution = {source_distribution}")
-                        print(f"outside_sources = {outside_sources}")
+                        # print(f"source_distribution = {source_distribution}")
+                        # print(f"outside_sources = {outside_sources}")
 
                         selected_sources = assign_random_sources_from_clusters(st.session_state["cluster_map"], source_distribution, outside_sources)
-                        print("----CHOOSEN----")
-                        print(selected_sources)
+                        # print("----CHOOSEN----")
+                        # print(selected_sources)
 
                         st.session_state.simulation.initialize(selected_sources)
 
@@ -323,14 +325,30 @@ if st.session_state.graph_generation_method is not None:
                     st.write("Оберіть джерела!")
 
 
+        
         visualization_placeholder = st.empty()
+        line_chart_placeholder = st.empty()
+        pie_chart_placeholder = st.empty()
+
+
         if st.session_state.simulation_mode == "fixed":
             for step in range(st.session_state.simulation_steps):
                 st.session_state.simulation.step()
                 st.session_state.simulation_steps_run += 1
 
                 st.session_state.simulation.visualize(visualization_placeholder, st.session_state.simulation_steps_run)
+                
+                state_counts = st.session_state.simulation.state_counts  
+                state_count_now = st.session_state.simulation.state_count  
+
+                plot_state_dynamics(state_counts, line_chart_placeholder, total_steps=st.session_state.simulation_steps)
+                plot_pie_chart(state_count_now, pie_chart_placeholder, step=st.session_state.simulation_steps_run)
+
+                
                 time.sleep(1)
 
         if (st.session_state.simulation_mode is None or st.session_state.simulation_steps_run == st.session_state.simulation_steps):
+            if st.session_state.simulation_steps_run == st.session_state.simulation_steps:
+                st.success("Симуляцію завершено — досягнуто максимальної кількості ітерацій.")
+
             st.session_state.simulation.visualize(visualization_placeholder)
