@@ -86,10 +86,6 @@ def plot_state_dynamics(state_counts, container, total_steps, state2color: dict)
     container.plotly_chart(fig, use_container_width=True)
 
 
-# def autopct_hide_zero(pct):
-#     return f'{pct:.0f}%' if pct > 0 else ''
-
-
 def plot_pie_chart(state_count, container, state2color, step=None):
     labels = [state.name for state in state_count.keys()]
     values = list(state_count.values())

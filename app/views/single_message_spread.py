@@ -40,7 +40,6 @@ if "simulation_steps" not in st.session_state:
     st.session_state["simulation_steps"] = None
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
-# tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"], key="tabs_single")
 
 with tab1:
     use_clusters = st.radio(

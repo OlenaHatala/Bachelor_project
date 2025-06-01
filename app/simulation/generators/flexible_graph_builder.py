@@ -28,8 +28,6 @@ class FlexibleGraphBuilder:
         current_node = 0
         cluster_nodes = []
 
-        # Створюємо кластери
-        # for size, prob in zip(cluster_sizes, cluster_probs):
         for cluster_id, (size, prob) in enumerate(zip(cluster_sizes, cluster_probs)):
 
             nodes = list(range(current_node, current_node + size))
@@ -49,7 +47,6 @@ class FlexibleGraphBuilder:
         assigned_nodes = set(sum(cluster_nodes, []))
         remaining_nodes = list(all_nodes - assigned_nodes)
 
-        # Додаємо залишкові вузли
         if remaining_strategy == RemainingNodeStrategy.RANDOM:
             for node in remaining_nodes:
                 self.graph.add_node(node)
@@ -70,7 +67,6 @@ class FlexibleGraphBuilder:
                     if i != j and random.random() < external_prob:
                         self.graph.add_edge(remaining_nodes[i], remaining_nodes[j])
 
-        # Додаємо міжкластерні зв'язки
         for i in range(len(cluster_nodes)):
             for j in range(i + 1, len(cluster_nodes)):
                 for node_i in cluster_nodes[i]:
@@ -85,11 +81,9 @@ class FlexibleGraphBuilder:
     def get_cluster_map(self):
         cluster_map = {}
         for node in self.graph.nodes:
-            # cluster = self.graph.nodes[node].get("cluster", "невідомо")
             cluster = self.graph.nodes[node].get("cluster")
             cluster_map.setdefault(cluster, []).append(node)
 
-        # Сортуємо кожен список вузлів усередині кластерів
         for key in cluster_map:
             cluster_map[key].sort()
 
