@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
-from simulation.models.state_enums import State, STATE2COLOR
+from simulation.models.state_enums import SingleSourceState, SINGLE_STATE2COLOR
 import plotly.graph_objects as go
 
 
@@ -21,16 +21,49 @@ def visualize_graph(G, container, step=None, node_colors=None):
     plt.close(fig)
 
 
-def plot_state_dynamics(state_counts, container, total_steps):
+# def plot_state_dynamics(state_counts, container, total_steps):
+#     fig = go.Figure()
+
+#     for state, counts in state_counts.items():
+#         fig.add_trace(go.Scatter(
+#             x=list(range(len(counts))),
+#             y=counts,
+#             mode='lines+markers',  # 🔘 лінії + точки
+#             name=state.name,
+#             line=dict(color=SINGLE_STATE2COLOR[state], width=2),
+#             marker=dict(size=6)
+#         ))
+
+#     fig.update_layout(
+#         title=dict(
+#             text="Динаміка станів",
+#             x=0.5, 
+#             xanchor='center'
+#         ),
+#         title_automargin=True,
+#         xaxis_title="Крок",
+#         yaxis_title="Кількість вузлів",
+#         xaxis=dict(range=[0, total_steps]),
+#         yaxis=dict(rangemode='tozero'),
+#         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+#         height=350,
+#         margin=dict(l=10, r=10, t=40, b=10)
+#     )
+
+#     container.plotly_chart(fig, use_container_width=True)
+
+
+def plot_state_dynamics(state_counts, container, total_steps, state2color: dict):
     fig = go.Figure()
 
     for state, counts in state_counts.items():
+        color = state2color.get(state, "#999999")  # fallback колір, якщо нема в словнику
         fig.add_trace(go.Scatter(
             x=list(range(len(counts))),
             y=counts,
-            mode='lines+markers',  # 🔘 лінії + точки
+            mode='lines+markers',
             name=state.name,
-            line=dict(color=STATE2COLOR[state], width=2),
+            line=dict(color=color, width=2),
             marker=dict(size=6)
         ))
 
@@ -52,14 +85,15 @@ def plot_state_dynamics(state_counts, container, total_steps):
 
     container.plotly_chart(fig, use_container_width=True)
 
-def autopct_hide_zero(pct):
-    return f'{pct:.0f}%' if pct > 0 else ''
+
+# def autopct_hide_zero(pct):
+#     return f'{pct:.0f}%' if pct > 0 else ''
 
 
-def plot_pie_chart(state_count, container, step=None):
+def plot_pie_chart(state_count, container, state2color, step=None):
     labels = [state.name for state in state_count.keys()]
     values = list(state_count.values())
-    colors = [STATE2COLOR[state] for state in state_count.keys()]
+    colors = [state2color[state] for state in state_count.keys()]
 
     fig = go.Figure(data=[go.Pie(
         labels=labels,

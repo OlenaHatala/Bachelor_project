@@ -10,17 +10,17 @@ st.set_page_config(page_title="Симуляція графа", layout="centered"
 st.title("Симуляція поширення у графі")
 
 # === Стани ===
-class State(Enum):
+class SingleSourceState(Enum):
     SOURCE = 0
     SUSCEPTIBLE = 1
     INFECTED = 2
     RECOVERED = 3
 
-STATE2COLOR = {
-    State.SOURCE: "red",
-    State.SUSCEPTIBLE: "#5478b3",
-    State.INFECTED: "orange",
-    State.RECOVERED: "green"
+SINGLE_STATE2COLOR = {
+    SingleSourceState.SOURCE: "red",
+    SingleSourceState.SUSCEPTIBLE: "#5478b3",
+    SingleSourceState.INFECTED: "orange",
+    SingleSourceState.RECOVERED: "green"
 }
 
 # === Функції ===
@@ -29,10 +29,10 @@ def initialize_graph(n=6, p=0.3, seed=1):
     np.random.seed(seed)
     for node in G.nodes:
         if node == 3 or node == 7:
-            G.nodes[node]["state"] = State.SOURCE
+            G.nodes[node]["state"] = SingleSourceState.SOURCE
             G.nodes[node]["resistance"] = 0.0
         else:
-            G.nodes[node]["state"] = State.SUSCEPTIBLE
+            G.nodes[node]["state"] = SingleSourceState.SUSCEPTIBLE
             G.nodes[node]["resistance"] = np.random.random()
     return G
 
@@ -41,36 +41,36 @@ def update_state(sg, sg_copy, node):
     predecessors = set(nx.all_neighbors(sg, node)) - successors
     state = sg.nodes[node]["state"]
 
-    if state == State.SOURCE:
+    if state == SingleSourceState.SOURCE:
         return
 
-    elif state == State.RECOVERED:
+    elif state == SingleSourceState.RECOVERED:
         condition = np.random.random()
         if sg.nodes[node]["resistance"] > condition:
             sg.nodes[node]["resistance"] = min(sg.nodes[node]["resistance"] * 2,
                                                sg.nodes[node]["resistance"] + np.random.random(), 1)
         else:
-            sg_copy.nodes[node]["state"] = State.SUSCEPTIBLE
+            sg_copy.nodes[node]["state"] = SingleSourceState.SUSCEPTIBLE
 
-    elif state == State.SUSCEPTIBLE:
-        source_influenced = State.SOURCE in [sg_copy.nodes[pre]["state"] for pre in predecessors]
-        infected_influenced = State.INFECTED in [sg_copy.nodes[pre]["state"] for pre in predecessors]
+    elif state == SingleSourceState.SUSCEPTIBLE:
+        source_influenced = SingleSourceState.SOURCE in [sg_copy.nodes[pre]["state"] for pre in predecessors]
+        infected_influenced = SingleSourceState.INFECTED in [sg_copy.nodes[pre]["state"] for pre in predecessors]
         if source_influenced or infected_influenced:
             condition = np.random.random()
             if sg.nodes[node]["resistance"] < condition:
-                sg_copy.nodes[node]["state"] = State.INFECTED
+                sg_copy.nodes[node]["state"] = SingleSourceState.INFECTED
 
-    elif state == State.INFECTED:
+    elif state == SingleSourceState.INFECTED:
         condition = np.random.random()
         if sg.nodes[node]["resistance"] > condition:
-            sg_copy.nodes[node]["state"] = State.RECOVERED
+            sg_copy.nodes[node]["state"] = SingleSourceState.RECOVERED
         else:
             sg.nodes[node]["resistance"] = max(sg.nodes[node]["resistance"] / 2,
                                                sg.nodes[node]["resistance"] - np.random.random())
 
 def visualize_graph(sg, pos, container, step=None):
     fig, ax = plt.subplots()
-    node_colors = [STATE2COLOR[sg.nodes[node]["state"]] for node in sg.nodes]
+    node_colors = [SINGLE_STATE2COLOR[sg.nodes[node]["state"]] for node in sg.nodes]
 
     nx.draw_networkx_nodes(sg, pos, ax=ax, node_color=node_colors, edgecolors='black', node_size=500)
     nx.draw_networkx_labels(sg, pos, ax=ax, font_weight='bold')
@@ -88,7 +88,7 @@ def visualize_graph(sg, pos, container, step=None):
 def plot_state_dynamics(state_counts, container, total_steps):
     fig, ax = plt.subplots()
     for state, counts in state_counts.items():
-        ax.plot(counts, label=state.name, color=STATE2COLOR[state], linewidth=2)
+        ax.plot(counts, label=state.name, color=SINGLE_STATE2COLOR[state], linewidth=2)
 
     ax.set_xlim(0, total_steps - 1)  # 🔒 фіксований діапазон по осі X
     ax.set_xlabel("Крок")
@@ -111,7 +111,7 @@ if st.button("Запустити симуляцію"):
     graph_container = st.empty()
     plot_container = st.empty()
 
-    state_counts = {state: [] for state in State}
+    state_counts = {state: [] for state in SingleSourceState}
 
     for step in range(steps):
         sg_copy = sg.copy()
@@ -122,7 +122,7 @@ if st.button("Запустити симуляцію"):
 
         # 📊 Підрахунок станів
         all_states = [sg.nodes[n]["state"] for n in sg.nodes]
-        for state in State:
+        for state in SingleSourceState:
             state_counts[state].append(all_states.count(state))
 
         # 🖼️ Граф

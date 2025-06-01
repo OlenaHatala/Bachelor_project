@@ -10,6 +10,7 @@ from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, 
 from simulation.models.single_message_model import SingleMessageSpreadModel
 from utils.graph_visualization import visualize_graph, plot_state_dynamics, plot_pie_chart
 from utils.graph_utils import assign_random_sources_from_clusters
+from simulation.models.state_enums import SINGLE_STATE2COLOR
 
 
 st.set_page_config(layout="centered")
@@ -39,6 +40,7 @@ if "simulation_steps" not in st.session_state:
     st.session_state["simulation_steps"] = None
 
 tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"])
+# tab1, tab2 = st.tabs(["Власні налаштування", "Автоматичне генерування графа"], key="tabs_single")
 
 with tab1:
     use_clusters = st.radio(
@@ -321,8 +323,10 @@ if st.session_state.graph_generation_method is not None:
                             st.session_state["simulation_max_steps"] = max_steps
 
                 else:
-                    st.write("Неможливо налаштувати та почати симуляцію.")
-                    st.write("Оберіть джерела!")
+                    # st.write("Неможливо налаштувати та почати симуляцію.")
+                    # st.write("Оберіть джерела!")
+                    st.warning("❗ Спершу збережіть налаштування для джерел.")
+
 
 
         
@@ -341,8 +345,8 @@ if st.session_state.graph_generation_method is not None:
                 state_counts = st.session_state.simulation.state_counts  
                 state_count_now = st.session_state.simulation.state_count  
 
-                plot_state_dynamics(state_counts, line_chart_placeholder, total_steps=st.session_state.simulation_steps)
-                plot_pie_chart(state_count_now, pie_chart_placeholder, step=st.session_state.simulation_steps_run)
+                plot_state_dynamics(state_counts, line_chart_placeholder, total_steps=st.session_state.simulation_steps, state2color=SINGLE_STATE2COLOR)
+                plot_pie_chart(state_count_now, pie_chart_placeholder, step=st.session_state.simulation_steps_run, state2color=SINGLE_STATE2COLOR)
 
                 
                 time.sleep(1)

@@ -9,7 +9,7 @@ import copy
 
 
 from simulation.generators.graph_factory import GraphGeneratorFactory
-from simulation.models.single_message_model import SingleMessageSpreadModel, State, STATE2COLOR, plot_state_dynamics, plot_pie_chart, visualize_graph, update_state
+from simulation.models.single_message_model import SingleMessageSpreadModel, SingleSourceState, SINGLE_STATE2COLOR, plot_state_dynamics, plot_pie_chart, visualize_graph, update_state
 
 # st.set_page_config(page_title="Симуляція поширення у графі", layout="wide")
 st.set_page_config(page_title="Симуляція поширення у графі", layout="centered")
@@ -129,7 +129,7 @@ if st.session_state.get("simulation_configured"):
         
         graph = st.session_state.graph
 
-        state_counts = {state: [] for state in State}
+        state_counts = {state: [] for state in SingleSourceState}
 
         for step in range(steps):
             graph_copy = copy.deepcopy(graph)
@@ -145,12 +145,12 @@ if st.session_state.get("simulation_configured"):
         
 
             all_states = [graph.nodes[n]["state"] for n in graph.nodes]
-            for state in State:
+            for state in SingleSourceState:
                 state_counts[state].append(all_states.count(state))
 
 
-            state_count_current = {state: all_states.count(state) for state in State}
-            for state in State:
+            state_count_current = {state: all_states.count(state) for state in SingleSourceState}
+            for state in SingleSourceState:
                 state_counts[state].append(state_count_current[state])
 
             with graph_container:
