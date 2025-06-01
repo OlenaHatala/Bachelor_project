@@ -1,5 +1,6 @@
 import streamlit as st
 import networkx as nx
+import random
 import time
 
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
@@ -31,11 +32,12 @@ tab1, tab2 = st.tabs(["Власні налаштування", "Автомати
 
 
 with tab1:
-    use_clusters = st.radio(
+    st.radio(
         label="**Створювати кластери при побудові графа?**",
         options=["Так", "Ні"],
         index=0,
-        horizontal=True
+        horizontal=True,
+        key="antag__use_clusters"
     )
 
     with st.form("custom_graph_form"):
@@ -48,7 +50,7 @@ with tab1:
         remaining = 0
         add_remaining = "немає залишкових вузлів"
 
-        if use_clusters == "Так":
+        if st.session_state.antag__use_clusters == "Так":
             st.session_state["antag_scrs__are_clusters"] = True
 
             num_clusters = st.number_input("Кількість кластерів", min_value=1, max_value=total_nodes, value=2, step=1)
@@ -121,7 +123,7 @@ with tab1:
         if submit_custom:
             builder = FlexibleGraphBuilder(total_nodes)
 
-            if use_clusters == "Так":
+            if st.session_state.antag__use_clusters == "Так":
                 strategy = (
                     RemainingNodeStrategy.RANDOM
                     if add_remaining == "Додати до кластерів випадково"
@@ -143,17 +145,7 @@ with tab1:
                     external_prob=external_prob
                 )
 
-                # print("\nПриналежність вузлів до кластерів")
-                # cluster_map = builder.get_cluster_map()
-                # st.session_state["cluster_map"] = cluster_map
-
                 st.session_state["antag_srcs__cluster_map"] = builder.get_cluster_map()
-
-                # for cluster_id in sorted(cluster_map.keys(), key=lambda x: (999 if x == "around" else x)):
-                #     if cluster_id == "around":
-                #         print("**Залишкові вузли (поза кластерами):**", sorted(cluster_map[cluster_id]))
-                #     else:
-                #         print(f"**Кластер {cluster_id}:**", sorted(cluster_map[cluster_id]))
 
             else:
                 G = builder.build_flat_graph(general_prob)
@@ -209,7 +201,7 @@ with tab2:
 if st.session_state.antag_srcs__graph_generation_method is not None:
     st.session_state.antag__simulation_steps_run = 0
 
-    st.markdown("### Налаштування джерел поширення")
+    st.markdown("<h5 style='text-align: center;'>Налаштування джерел поширення</h5>", unsafe_allow_html=True)
 
     colA, colB = st.columns(2)
 
@@ -255,7 +247,6 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
             if st.button("Зберегти джерела A"):
                 st.session_state["sources_A_saved"] = True
-                # st.success("Налаштування джерел A збережено")
 
     with colB:
         with st.expander("🔵 Джерела типу B", expanded=False):
@@ -299,49 +290,56 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
             if st.button("Зберегти джерела B"):
                 st.session_state["sources_B_saved"] = True
-                # st.success("Налаштування джерел B збережено")
 
 
-    # Якщо обидва типи джерел збережено, викликаємо функцію призначення та ініціалізацію моделі
     if st.session_state.get("sources_A_saved") and st.session_state.get("sources_B_saved"):
-        cluster_map = st.session_state.get("antag_srcs__cluster_map", {})
-        cluster_config = st.session_state.get("antag_scrs__cluster_config", {})
-        total_nodes = st.session_state.antag_simulation.get_num_nodes()
+        if st.session_state.antag__use_clusters == "Так":
+            cluster_map = st.session_state.get("antag_srcs__cluster_map", {})
+            cluster_config = st.session_state.get("antag_scrs__cluster_config", {})
+            total_nodes = st.session_state.antag_simulation.get_num_nodes()
 
-        num_clusters = cluster_config.get("num_clusters", 0)
-        cluster_sizes = cluster_config.get("sizes", [])
-        remaining = cluster_config.get("remaining", 0)
+            num_clusters = cluster_config.get("num_clusters", 0)
+            cluster_sizes = cluster_config.get("sizes", [])
+            remaining = cluster_config.get("remaining", 0)
 
-        dist_A = [st.session_state.get(f"source_A_cluster_{i}", 0) for i in range(num_clusters)]
-        outside_A = st.session_state.get("outside_sources_A", 0)
-        # print(f"\ndist_A = {dist_A}")
-        # print(f"outside_A = {outside_A}")
+            dist_A = [st.session_state.get(f"source_A_cluster_{i}", 0) for i in range(num_clusters)]
+            outside_A = st.session_state.get("outside_sources_A", 0)
 
-        dist_B = [st.session_state.get(f"source_B_cluster_{i}", 0) for i in range(num_clusters)]
-        outside_B = st.session_state.get("outside_sources_B", 0)
-        # print(f"dist_B = {dist_B}")
-        # print(f"outside_B = {outside_B}")
+            dist_B = [st.session_state.get(f"source_B_cluster_{i}", 0) for i in range(num_clusters)]
+            outside_B = st.session_state.get("outside_sources_B", 0)
 
-        try:
-            sources_A, sources_B = assign_sources_dual(
-                cluster_map=cluster_map,
-                source_dist_A=dist_A,
-                outside_A=outside_A,
-                source_dist_B=dist_B,
-                outside_B=outside_B,
-                total_nodes=total_nodes
-            )
+            try:
+                sources_A, sources_B = assign_sources_dual(
+                    cluster_map=cluster_map,
+                    source_dist_A=dist_A,
+                    outside_A=outside_A,
+                    source_dist_B=dist_B,
+                    outside_B=outside_B,
+                    total_nodes=total_nodes
+                )
 
-            # print(f"sources_A = {sources_A}")
-            # print(f"sources_B = {sources_B}")
+                st.session_state.antag_simulation.initialize(sources_A, sources_B)
+                st.session_state["antag_sources_chosen"] = True
+                st.success("Обидва типи джерел збережено та застосовано.")
+            except ValueError as e:
+                st.error(f"Помилка під час розподілу джерел: {str(e)}")
 
-            # ініціалізуємо модель
-            st.session_state.antag_simulation.initialize(sources_A, sources_B)
-            st.session_state["antag_sources_chosen"] = True
-            st.success("Обидва типи джерел збережено та застосовано.")
-        except ValueError as e:
-            st.error(f"Помилка під час розподілу джерел: {str(e)}")
+        else:
+            total_nodes = st.session_state.antag_simulation.get_num_nodes()
+            total_A = st.session_state.get("total_sources_A", 0)
+            total_B = st.session_state.get("total_sources_B", 0)
 
+            if total_A + total_B > total_nodes:
+                st.error(f"Сумарна кількість джерел ({total_A + total_B}) перевищує кількість вузлів у графі ({total_nodes})")
+            else:
+                all_nodes = list(range(total_nodes))
+                sources_A = random.sample(all_nodes, total_A)
+                remaining_nodes = list(set(all_nodes) - set(sources_A))
+                sources_B = random.sample(remaining_nodes, total_B)
+
+                st.session_state.antag_simulation.initialize(sources_A, sources_B)
+                st.session_state["antag_sources_chosen"] = True
+                st.success("Обидва типи джерел збережено та застосовано.")
 
 
         with st.popover("Симуляція"):
@@ -379,6 +377,8 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
                     st.session_state["antag_simulation_max_steps"] = max_steps
 
                 st.session_state["antag_simulation_started"] = True
+
+    
     else:
         with st.popover("Симуляція"):
             st.warning("❗ Спочатку потрібно зберегти налаштування для обох типів джерел A та B.")
@@ -403,7 +403,6 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
             plot_pie_chart(state_count_now, pie_placeholder, ANTAGONISTIC_STATE2COLOR, step=st.session_state.antag__simulation_steps_run)
 
             time.sleep(1)
-
 
 
     if (st.session_state.antag_simulation_mode is None or st.session_state.antag__simulation_steps_run == st.session_state.antag_simulation_steps):

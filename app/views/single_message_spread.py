@@ -5,7 +5,6 @@ import numpy as np
 import random
 import time
 
-
 from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, FlexibleGraphBuilder
 from simulation.models.single_message_model import SingleMessageSpreadModel
 from utils.graph_visualization import visualize_graph, plot_state_dynamics, plot_pie_chart
@@ -154,17 +153,7 @@ with tab1:
                     external_prob=external_prob
                 )
 
-                # print("\nПриналежність вузлів до кластерів")
-                # cluster_map = builder.get_cluster_map()
-                # st.session_state["cluster_map"] = cluster_map
-
                 st.session_state["cluster_map"] = builder.get_cluster_map()
-
-                # for cluster_id in sorted(cluster_map.keys(), key=lambda x: (999 if x == "around" else x)):
-                #     if cluster_id == "around":
-                #         print("**Залишкові вузли (поза кластерами):**", sorted(cluster_map[cluster_id]))
-                #     else:
-                #         print(f"**Кластер {cluster_id}:**", sorted(cluster_map[cluster_id]))
 
             else:
                 G = builder.build_flat_graph(general_prob)
@@ -173,6 +162,7 @@ with tab1:
 
             st.success("Натиснули кнопку для створення налаштованого графа")
             st.session_state["graph_generation_method"] = "custom"
+
 
 with tab2:
     with st.form("auto_graph_form"):
@@ -215,7 +205,6 @@ with tab2:
             st.success("Натиснули кнопку для створення автоматичного графа")
             st.session_state["graph_generation_method"] = "auto"
 
-# print("\n")
 
 if st.session_state.graph_generation_method is not None:
     st.session_state.simulation_steps_run = 0
@@ -265,6 +254,7 @@ if st.session_state.graph_generation_method is not None:
 
                 if st.button("Зберегти"):
                     st.session_state["sources_choosen"] = True
+
                     if st.session_state.graph_generation_method == "custom" and st.session_state.are_clusters:
                         num_clusters = st.session_state["cluster_config"]["num_clusters"]
                         
@@ -274,15 +264,13 @@ if st.session_state.graph_generation_method is not None:
                         outside_sources = st.session_state.get("outside_sources", 0)
                         st.session_state["source_distribution"] = source_distribution
                     
-                        # print(f"source_distribution = {source_distribution}")
-                        # print(f"outside_sources = {outside_sources}")
+                        selected_sources = assign_random_sources_from_clusters(st.session_state["cluster_map"], source_distribution, outside_sources)                       
 
-                        selected_sources = assign_random_sources_from_clusters(st.session_state["cluster_map"], source_distribution, outside_sources)
-                        # print("----CHOOSEN----")
-                        # print(selected_sources)
+                    else:
+                        all_nodes = list(st.session_state.simulation.graph.nodes)
+                        selected_sources = random.sample(all_nodes, st.session_state["total_sources"])
 
-                        st.session_state.simulation.initialize(selected_sources)
-
+                    st.session_state.simulation.initialize(selected_sources)
 
         with col2:
             with st.popover("Симуляція"):
@@ -322,11 +310,7 @@ if st.session_state.graph_generation_method is not None:
                             st.session_state["simulation_max_steps"] = max_steps
 
                 else:
-                    # st.write("Неможливо налаштувати та почати симуляцію.")
-                    # st.write("Оберіть джерела!")
                     st.warning("❗ Спершу збережіть налаштування для джерел.")
-
-
 
         
         visualization_placeholder = st.empty()
