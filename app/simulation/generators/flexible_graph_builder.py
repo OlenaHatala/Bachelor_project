@@ -53,19 +53,28 @@ class FlexibleGraphBuilder:
                 self.graph.nodes[node]["cluster"] = "around"
                 cluster = random.choice(cluster_nodes)
                 for target in cluster:
-                    if random.random() < external_prob:
+                    if random.random() < 1:
                         self.graph.add_edge(node, target)
-                    if random.random() < external_prob:
+                    if random.random() < 1:
                         self.graph.add_edge(target, node)
+
         elif remaining_strategy == RemainingNodeStrategy.SEPARATE:
             for node in remaining_nodes:
                 self.graph.add_node(node)
                 self.graph.nodes[node]["cluster"] = "around"
 
-            for i in range(len(remaining_nodes)):
-                for j in range(len(remaining_nodes)):
-                    if i != j and random.random() < external_prob:
-                        self.graph.add_edge(remaining_nodes[i], remaining_nodes[j])
+            non_remaining_nodes = list(assigned_nodes)
+
+            # for i in range(len(remaining_nodes)):
+            #     for j in range(len(remaining_nodes)):
+            #         if i != j and random.random() < external_prob:
+            #             self.graph.add_edge(remaining_nodes[i], remaining_nodes[j])
+            for node in remaining_nodes:
+                for target in non_remaining_nodes:
+                    if random.random() < external_prob:
+                        self.graph.add_edge(node, target)
+                    if random.random() < external_prob:
+                        self.graph.add_edge(target, node)
 
         for i in range(len(cluster_nodes)):
             for j in range(i + 1, len(cluster_nodes)):

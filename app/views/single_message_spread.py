@@ -57,7 +57,7 @@ with tab1:
         num_clusters = 0
         external_prob = 0.0
         remaining = 0
-        add_remaining = "немає залишкових вузлів"
+        # add_remaining = "немає залишкових вузлів"
 
         if use_clusters == "Так":
             st.session_state["are_clusters"] = True
@@ -109,17 +109,20 @@ with tab1:
             )
 
             if remaining > 0:
-                add_remaining = st.radio(
+                st.radio(
                     label="Що робити з залишковими вузлами?",
                     options=["Додати до кластерів випадково", "Залишити окремо"],
                     index=1,
                     key="add_remaining"
                 )
 
-                external_prob = st.slider(
-                    "Ймовірність з'єднання залишкових вузлів з іншими",
-                    0.0, 1.0, 0.2
-                )
+                if st.session_state.add_remaining == "Залишити окремо":
+                    external_prob = st.slider(
+                        "Ймовірність з'єднання залишкових вузлів з іншими",
+                        0.0, 1.0, 0.2
+                    )
+                else:
+                    external_prob = 0
 
         else:
             st.session_state["are_clusters"] = False
@@ -135,7 +138,7 @@ with tab1:
             if use_clusters == "Так":
                 strategy = (
                     RemainingNodeStrategy.RANDOM
-                    if add_remaining == "Додати до кластерів випадково"
+                    if st.session_state.add_remaining == "Додати до кластерів випадково"
                     else RemainingNodeStrategy.SEPARATE
                 )
 
@@ -143,7 +146,7 @@ with tab1:
                     "num_clusters": num_clusters,
                     "sizes": cluster_sizes,
                     "remaining": remaining,
-                    "add_remaining": add_remaining
+                    "add_remaining": st.session_state.add_remaining 
                 }
 
                 G = builder.build_clustered_graph(

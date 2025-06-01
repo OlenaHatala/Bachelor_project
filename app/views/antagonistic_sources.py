@@ -49,7 +49,7 @@ with tab1:
         num_clusters = 0
         external_prob = 0.0
         remaining = 0
-        add_remaining = "немає залишкових вузлів"
+        # add_remaining = "немає залишкових вузлів"
 
         if st.session_state.antag__use_clusters == "Так":
             st.session_state["antag_scrs__are_clusters"] = True
@@ -101,17 +101,20 @@ with tab1:
             )
 
             if remaining > 0:
-                add_remaining = st.radio(
+                st.radio(
                     label="Що робити з залишковими вузлами?",
                     options=["Додати до кластерів випадково", "Залишити окремо"],
                     index=1,
-                    key="add_remaining"
+                    key="antag_add_remaining"
                 )
 
-                external_prob = st.slider(
-                    "Ймовірність з'єднання залишкових вузлів з іншими",
-                    0.0, 1.0, 0.2
-                )
+                if st.session_state.antag_add_remaining == "Залишити окремо":
+                    external_prob = st.slider(
+                        "Ймовірність з'єднання залишкових вузлів з іншими",
+                        0.0, 1.0, 0.2
+                    )
+                else:
+                    external_prob = 0
 
         else:
             st.session_state["antag_scrs__are_clusters"] = False
@@ -127,7 +130,7 @@ with tab1:
             if st.session_state.antag__use_clusters == "Так":
                 strategy = (
                     RemainingNodeStrategy.RANDOM
-                    if add_remaining == "Додати до кластерів випадково"
+                    if st.session_state.antag_add_remaining == "Додати до кластерів випадково"
                     else RemainingNodeStrategy.SEPARATE
                 )
 
@@ -135,7 +138,7 @@ with tab1:
                     "num_clusters": num_clusters,
                     "sizes": cluster_sizes,
                     "remaining": remaining,
-                    "add_remaining": add_remaining
+                    "add_remaining": st.session_state.antag_add_remaining
                 }
 
                 G = builder.build_clustered_graph(
@@ -221,7 +224,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
                     )
                     total_sources_A_allocated += st.session_state.get(f"source_A_cluster_{i}", 0)
 
-                if remaining > 0 and st.session_state.get("add_remaining") == "Залишити окремо":
+                if remaining > 0 and st.session_state.get("antag_add_remaining") == "Залишити окремо":
                     st.number_input(
                         "Джерела A серед залишкових вузлів",
                         min_value=0,
@@ -264,7 +267,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
                     )
                     total_sources_B_allocated += st.session_state.get(f"source_B_cluster_{i}", 0)
 
-                if remaining > 0 and st.session_state.get("add_remaining") == "Залишити окремо":
+                if remaining > 0 and st.session_state.get("antag_add_remaining") == "Залишити окремо":
                     st.number_input(
                         "Джерела B серед залишкових вузлів",
                         min_value=0,
