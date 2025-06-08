@@ -183,11 +183,11 @@ with tab2:
     with st.form("auto_graph_form"):
         n = st.number_input("Кількість вузлів", min_value=2, value=10, key="auto_n")
 
-        if graph_type == "Small-World Graph":
+        if graph_type == "Малосвітовий граф":
             k = st.slider("Кількість найближчих сусідів (k)", min_value=1, max_value=n - 1, value=min(4, n - 1), key="auto_k")
             p = st.slider("Ймовірність перез'єднання (p)", min_value=0.0, max_value=1.0, value=0.1, key="auto_p")
             params = (n, k, p)
-        elif graph_type == "Scale-Free Graph":
+        elif graph_type == "Безмасштабний граф":
             params = (n,)
         else:
             params = (n,)

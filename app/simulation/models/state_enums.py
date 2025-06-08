@@ -39,10 +39,10 @@ ANTAGONISTIC_STATE2COLOR = {
 }
 
 ANTAGONISTIC_STATE_LABELS = {
-    AntagonisticState.SOURCE_A: "Джерела дезінформації",
-    AntagonisticState.SOURCE_B: "Джерела спростувань",
-    AntagonisticState.SUSCEPTIBLE: "Вразливі",
-    AntagonisticState.INFECTED_A: "Прихильники A",
-    AntagonisticState.INFECTED_B: "Прихильники B",
+    AntagonisticState.SOURCE_A: "Джерела дезінформації (A)",
+    AntagonisticState.SOURCE_B: "Джерела спростувань (B)",
+    AntagonisticState.SUSCEPTIBLE: "Вразливі до впливу",
+    AntagonisticState.INFECTED_A: "Інфіковані дезінформацією",
+    AntagonisticState.INFECTED_B: "Інфіковані спростуванням",
     AntagonisticState.RECOVERED: "Здорові"
 }
