@@ -7,7 +7,7 @@ from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, 
 from simulation.generators.graph_factory import GraphGeneratorFactory
 from simulation.models.antagonistic_spread_model import AntagonisticSpreadModel
 from utils.graph_utils import assign_sources_dual
-from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR
+from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR, ANTAGONISTIC_STATE_LABELS
 from utils.graph_visualization import plot_pie_chart, plot_state_dynamics, safe_visualize
 
 st.set_page_config(layout="centered")
@@ -395,7 +395,7 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
             state_counts = st.session_state.antag_simulation.state_counts
             state_count_now = st.session_state.antag_simulation.state_count
 
-            plot_state_dynamics(state_counts, plot_placeholder, st.session_state.antag_simulation_steps, ANTAGONISTIC_STATE2COLOR)
+            plot_state_dynamics(state_counts, plot_placeholder, st.session_state.antag_simulation_steps, ANTAGONISTIC_STATE2COLOR, state2label=ANTAGONISTIC_STATE_LABELS)
             plot_pie_chart(state_count_now, pie_placeholder, ANTAGONISTIC_STATE2COLOR, step=st.session_state.antag__simulation_steps_run)
 
             time.sleep(1)

@@ -13,6 +13,13 @@ SINGLE_STATE2COLOR = {
     SingleSourceState.RECOVERED: "green"
 }
 
+SINGLE_STATE_LABELS = {
+    SingleSourceState.SUSCEPTIBLE: "Вразливі",
+    SingleSourceState.INFECTED: "Інфіковані",
+    SingleSourceState.RECOVERED: "Здорові",
+    SingleSourceState.SOURCE: "Джерела дезінформації"
+}
+
 
 class AntagonisticState(Enum):
     SOURCE_A = 0
@@ -29,4 +36,13 @@ ANTAGONISTIC_STATE2COLOR = {
     AntagonisticState.INFECTED_A: "#f09595",
     AntagonisticState.INFECTED_B: "#959cf0",
     AntagonisticState.RECOVERED: "green"
+}
+
+ANTAGONISTIC_STATE_LABELS = {
+    AntagonisticState.SOURCE_A: "Джерела дезінформації",
+    AntagonisticState.SOURCE_B: "Джерела спростувань",
+    AntagonisticState.SUSCEPTIBLE: "Вразливі",
+    AntagonisticState.INFECTED_A: "Прихильники A",
+    AntagonisticState.INFECTED_B: "Прихильники B",
+    AntagonisticState.RECOVERED: "Здорові"
 }

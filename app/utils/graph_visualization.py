@@ -33,16 +33,18 @@ def visualize_graph(G, container, step=None, node_colors=None):
     plt.close(fig)
 
 
-def plot_state_dynamics(state_counts, container, total_steps, state2color: dict):
+def plot_state_dynamics(state_counts, container, total_steps, state2color: dict, state2label=None):
     fig = go.Figure()
 
     for state, counts in state_counts.items():
         color = state2color.get(state, "#999999")
+        label = state2label.get(state, state.name) if state2label else state.name
+        
         fig.add_trace(go.Scatter(
             x=list(range(len(counts))),
             y=counts,
             mode='lines+markers',
-            name=state.name,
+            name=label,
             line=dict(color=color, width=2),
             marker=dict(size=6)
         ))
