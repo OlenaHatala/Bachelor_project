@@ -45,8 +45,11 @@ with col4:
     Прикладом можуть слугувати *Facebook* та *Viber*.
     """)
 
+st.write("")
+st.markdown("---")
+st.write("")
 
-st.markdown("### 🔄 Візуалізація процесу поширення інформації")
+st.markdown("#### Візуалізація процесу поширення інформації")
 
 st.markdown("""
 У кожній моделі ви можете спостерігати візуалізацію **поширення інформації безпосередньо на графі** (для мереж до 30 вузлів), 
@@ -54,28 +57,18 @@ st.markdown("""
 Ці візуалізації оновлюються на кожному кроці симуляції.
 """)
 
-# --- Секція 1: Однорідне поширення дезінформації ---
 st.markdown("#### :material/record_voice_over: Однорідні джерела")
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([3, 1.5])  
 with col1:
-    st.markdown("*Граф, що змінюється з часом:*")
-    # TODO: вставити гіфку зміни графа
-    # st.image("app/assets/gif_placeholder_simple_graph.gif", use_container_width=True)
+    st.image("app/assets/simple_sim/graph.gif", use_container_width=True)
 
 with col2:
-    st.markdown("*Кругова діаграма станів вузлів:*")
-    # TODO: вставити гіфку кругової діаграми
-    # st.image("app/assets/gif_placeholder_simple_pie.gif", use_container_width=True)
+    st.image("app/assets/simple_sim/pie_chart.gif", use_container_width=True)
 
-# Графік динаміки
-st.markdown("*Динаміка станів у часі:*")
-# TODO: вставити гіфку графіку станів
-# st.image("app/assets/gif_placeholder_simple_line.gif", use_container_width=True)
+st.image("app/assets/simple_sim/dynamics.png", use_container_width=True)
 
-st.markdown("---")
 
-# --- Секція 2: Інформаційне протистояння ---
 st.markdown("#### :material/bolt: Інформаційне протистояння")
 
 col3, col4 = st.columns(2)
@@ -89,7 +82,6 @@ with col4:
     # TODO: вставити гіфку кругової діаграми
     # st.image("app/assets/gif_placeholder_antagonistic_pie.gif", use_container_width=True)
 
-# Графік динаміки
 st.markdown("*Динаміка станів у часі:*")
 # TODO: вставити гіфку графіку станів
 # st.image("app/assets/gif_placeholder_antagonistic_line.gif", use_container_width=True)
