@@ -59,6 +59,25 @@ st.markdown("""
 
 st.markdown("#### :material/record_voice_over: Однорідні джерела")
 
+# st.markdown("На цій вкладці для позначення використовуються такі кольори:")
+# st.markdown("- <span style='color:red'><b>червоний</b></span> – джерело дезінформації", unsafe_allow_html=True)
+# st.markdown("- <span style='color:lightsteelblue'><b>блакитний</b></span> – сприйнятливий вузол", unsafe_allow_html=True)
+# st.markdown("- <span style='color:darkorange'><b>темно-помаранчевий</b></span> – заражений вузол", unsafe_allow_html=True)
+# st.markdown("- <span style='color:green'><b>зелений</b></span> – відновлений вузол", unsafe_allow_html=True)
+
+
+
+st.markdown("""
+На цій вкладці для позначення використовуються такі кольори:  
+<span style='color:red'><b>червоний</b></span> – джерело дезінформації,  
+<span style='color:lightsteelblue'><b>блакитний</b></span> – вразливий вузол,  
+<span style='color:darkorange'><b>темно-помаранчевий</b></span> – інфікований вузол,  
+<span style='color:green'><b>зелений</b></span> – здоровий вузол.
+""", unsafe_allow_html=True)
+st.write("")
+st.write("")
+
+
 col1, col2 = st.columns([3, 1.5])  
 with col1:
     st.image("app/assets/simple_sim/graph.gif", use_container_width=True)
@@ -69,19 +88,24 @@ with col2:
 st.image("app/assets/simple_sim/dynamics.png", use_container_width=True)
 
 
+st.write("")
 st.markdown("#### :material/bolt: Інформаційне протистояння")
+st.markdown("""
+Тут використовуються такі позначення:  
+<span style='color:#f00202'><b>червоний</b></span> – джерело дезінформації (A),  
+<span style='color:#020af0'><b>синій</b></span> – джерело спростувань (B),  
+<span style='color:#bdbdbd'><b>сірий</b></span> – вразливий вузол,  
+<span style='color:#f09595'><b>рожево-червоний</b></span> – інфікований дезінформацією,  
+<span style='color:#959cf0'><b>синьо-фіолетовий</b></span> – інфікований спростуванням,  
+<span style='color:green'><b>зелений</b></span> – здоровий вузол.
+""", unsafe_allow_html=True)
+
 
 col3, col4 = st.columns(2)
 with col3:
-    st.markdown("*Граф, що змінюється з часом:*")
-    # TODO: вставити гіфку зміни графа
-    # st.image("app/assets/gif_placeholder_antagonistic_graph.gif", use_container_width=True)
+    st.image("app/assets/antag_sim/graph.png", use_container_width=True)
 
 with col4:
-    st.markdown("*Кругова діаграма станів вузлів:*")
-    # TODO: вставити гіфку кругової діаграми
-    # st.image("app/assets/gif_placeholder_antagonistic_pie.gif", use_container_width=True)
+    st.image("app/assets/antag_sim/pie_chart.png", use_container_width=True)
 
-st.markdown("*Динаміка станів у часі:*")
-# TODO: вставити гіфку графіку станів
-# st.image("app/assets/gif_placeholder_antagonistic_line.gif", use_container_width=True)
+st.image("app/assets/antag_sim/dynamics.png", use_container_width=True)
