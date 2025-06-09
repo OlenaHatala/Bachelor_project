@@ -14,7 +14,7 @@ from simulation.models.state_enums import SINGLE_STATE2COLOR, SINGLE_STATE_LABEL
 
 
 st.set_page_config(layout="centered")
-st.title("Модель поширення інформації від однорідних джерел")
+st.title("Модель поширення дезінформації від однорідних джерел")
 
 if "graph_generation_method" not in st.session_state:
     st.session_state["graph_generation_method"] = None

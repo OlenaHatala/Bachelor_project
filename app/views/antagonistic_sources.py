@@ -11,7 +11,7 @@ from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR, ANTAGONISTIC
 from utils.graph_visualization import plot_pie_chart, plot_state_dynamics, safe_visualize
 
 st.set_page_config(layout="centered")
-st.title("Модель впливу протилежних джерел у мережі")
+st.title("Модель впливу протилежних джерел інформації у мережі")
 
 st.session_state.current_page = "antag_scrs"
 if "antag_scrs__are_clusters" not in st.session_state:
