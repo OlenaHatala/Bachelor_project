@@ -7,11 +7,11 @@ from simulation.generators.flexible_graph_builder import RemainingNodeStrategy, 
 from simulation.generators.graph_factory import GraphGeneratorFactory
 from simulation.models.antagonistic_spread_model import AntagonisticSpreadModel
 from utils.graph_utils import assign_sources_dual
-from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR
+from simulation.models.state_enums import ANTAGONISTIC_STATE2COLOR, ANTAGONISTIC_STATE_LABELS
 from utils.graph_visualization import plot_pie_chart, plot_state_dynamics, safe_visualize
 
 st.set_page_config(layout="centered")
-st.title("Модель впливу протилежних джерел у мережі")
+st.title("Модель впливу протилежних джерел інформації у мережі")
 
 st.session_state.current_page = "antag_scrs"
 if "antag_scrs__are_clusters" not in st.session_state:
@@ -170,11 +170,11 @@ with tab2:
     with st.form("auto_graph_form"):
         n = st.number_input("Кількість вузлів", min_value=2, value=10, key="auto_n")
 
-        if graph_type == "Small-World Graph":
+        if graph_type == "Малосвітовий граф":
             k = st.slider("Кількість найближчих сусідів (k)", min_value=1, max_value=n - 1, value=min(4, n - 1), key="auto_k")
             p = st.slider("Ймовірність перез'єднання (p)", min_value=0.0, max_value=1.0, value=0.1, key="auto_p")
             params = (n, k, p)
-        elif graph_type == "Scale-Free Graph":
+        elif graph_type == "Безмасштабний граф":
             params = (n,)
         else:
             params = (n,)
@@ -337,13 +337,6 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
 
 
         with st.popover("Симуляція"):
-            # mode = st.radio(
-            #     "Оберіть режим симуляції:",
-            #     options=[
-            #         "Фіксована кількість ітерацій",
-            #         "До досягнення рівноваги (з обмеженням)"
-            #     ]
-            # )
             mode = "Фіксована кількість ітерацій"
 
             if mode == "Фіксована кількість ітерацій":
@@ -389,13 +382,12 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
             st.session_state.antag_simulation.step()
             st.session_state.antag__simulation_steps_run += 1
 
-            # st.session_state.antag_simulation.visualize(graph_placeholder, st.session_state.antag__simulation_steps_run)
             safe_visualize(st.session_state.antag_simulation, graph_placeholder, step=st.session_state.antag__simulation_steps_run)
 
             state_counts = st.session_state.antag_simulation.state_counts
             state_count_now = st.session_state.antag_simulation.state_count
 
-            plot_state_dynamics(state_counts, plot_placeholder, st.session_state.antag_simulation_steps, ANTAGONISTIC_STATE2COLOR)
+            plot_state_dynamics(state_counts, plot_placeholder, st.session_state.antag_simulation_steps, ANTAGONISTIC_STATE2COLOR, state2label=ANTAGONISTIC_STATE_LABELS)
             plot_pie_chart(state_count_now, pie_placeholder, ANTAGONISTIC_STATE2COLOR, step=st.session_state.antag__simulation_steps_run)
 
             time.sleep(1)
@@ -405,5 +397,4 @@ if st.session_state.antag_srcs__graph_generation_method is not None:
         if st.session_state.antag__simulation_steps_run == st.session_state.antag_simulation_steps:
             st.success("Симуляцію завершено — досягнуто максимальної кількості ітерацій.")
 
-    # st.session_state.antag_simulation.visualize(graph_placeholder)
     safe_visualize(st.session_state.antag_simulation, graph_placeholder)

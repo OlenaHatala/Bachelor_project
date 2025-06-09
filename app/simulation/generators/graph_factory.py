@@ -4,8 +4,8 @@ import random
 class GraphGeneratorFactory:
     def __init__(self):
         self.generators = {
-            "Scale-Free Graph": self.generate_scale_free_graph,
-            "Small-World Graph": self.generate_small_world_graph,
+            "Безмасштабний граф": self.generate_scale_free_graph,
+            "Малосвітовий граф": self.generate_small_world_graph,
         }
 
     def list_generators(self):
@@ -15,11 +15,11 @@ class GraphGeneratorFactory:
         return self.generators.get(name, None)
 
     def generate_scale_free_graph(self, n):
-        G = nx.scale_free_graph(n)
-        edges = [(u, v) for u, v in G.edges() if u != v] 
+        m = max(1, min(n - 1, 2))  
+        G = nx.barabasi_albert_graph(n, m)
         directed = nx.DiGraph()
-        directed.add_nodes_from(range(n))
-        directed.add_edges_from(edges)
+        directed.add_nodes_from(G.nodes())
+        directed.add_edges_from(G.edges())
         return directed
 
 
@@ -34,42 +34,3 @@ class GraphGeneratorFactory:
                 else:
                     directed.add_edge(v, u)
         return directed
-
-
-
-
-# class GraphGeneratorFactory:
-#     def __init__(self):
-#         self.generators = {
-#             "Fast GNP Random Graph": self.generate_fast_gnp_random_graph,
-#             "Scale-Free Graph": self.generate_scale_free_graph,
-#             "GNP Random Graph": self.generate_gnp_random_graph,
-#             # "Dense GNM Random Graph": self.generate_dense_gnm_random_graph,
-#             "Barabasi-Albert Graph": self.generate_barabasi_albert_graph,
-#         }
-
-#     def list_generators(self):
-#         return list(self.generators.keys())
-
-#     def get_generator(self, name):
-#         return self.generators.get(name, None)
-
-#     def generate_fast_gnp_random_graph(self, n, p):
-#         return nx.fast_gnp_random_graph(n, p, directed=True)
-
-#     def generate_scale_free_graph(self, n):
-#         G = nx.scale_free_graph(n)
-#         return nx.DiGraph(G)
-
-#     def generate_gnp_random_graph(self, n, p):
-#         G = nx.gnp_random_graph(n, p)
-#         return nx.DiGraph(G)
-
-#     # def generate_dense_gnm_random_graph(self, n, m):
-#     #     G = nx.dense_gnm_random_graph(n, m)
-#     #     return nx.DiGraph(G)
-
-#     def generate_barabasi_albert_graph(self, n, m):
-#         G = nx.barabasi_albert_graph(n, m)
-#         return nx.DiGraph(G)
-

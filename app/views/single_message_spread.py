@@ -10,11 +10,11 @@ from simulation.generators.graph_factory import GraphGeneratorFactory
 from simulation.models.single_message_model import SingleMessageSpreadModel
 from utils.graph_visualization import visualize_graph, plot_state_dynamics, plot_pie_chart, safe_visualize
 from utils.graph_utils import assign_random_sources_from_clusters
-from simulation.models.state_enums import SINGLE_STATE2COLOR
+from simulation.models.state_enums import SINGLE_STATE2COLOR, SINGLE_STATE_LABELS
 
 
 st.set_page_config(layout="centered")
-st.title("Модель поширення інформації від однорідних джерел")
+st.title("Модель поширення дезінформації від однорідних джерел")
 
 if "graph_generation_method" not in st.session_state:
     st.session_state["graph_generation_method"] = None
@@ -183,11 +183,11 @@ with tab2:
     with st.form("auto_graph_form"):
         n = st.number_input("Кількість вузлів", min_value=2, value=10, key="auto_n")
 
-        if graph_type == "Small-World Graph":
+        if graph_type == "Малосвітовий граф":
             k = st.slider("Кількість найближчих сусідів (k)", min_value=1, max_value=n - 1, value=min(4, n - 1), key="auto_k")
             p = st.slider("Ймовірність перез'єднання (p)", min_value=0.0, max_value=1.0, value=0.1, key="auto_p")
             params = (n, k, p)
-        elif graph_type == "Scale-Free Graph":
+        elif graph_type == "Безмасштабний граф":
             params = (n,)
         else:
             params = (n,)
@@ -344,7 +344,7 @@ if st.session_state.graph_generation_method is not None:
                 state_counts = st.session_state.simulation.state_counts  
                 state_count_now = st.session_state.simulation.state_count  
 
-                plot_state_dynamics(state_counts, line_chart_placeholder, total_steps=st.session_state.simulation_steps, state2color=SINGLE_STATE2COLOR)
+                plot_state_dynamics(state_counts, line_chart_placeholder, total_steps=st.session_state.simulation_steps, state2color=SINGLE_STATE2COLOR, state2label=SINGLE_STATE_LABELS)
                 plot_pie_chart(state_count_now, pie_chart_placeholder, step=st.session_state.simulation_steps_run, state2color=SINGLE_STATE2COLOR)
 
                 
